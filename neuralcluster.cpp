@@ -234,10 +234,9 @@ void NeuralCluster::train(float learningRate){
                 float weightedSumError = 0.0;
                 for(int k = 0; k < weightsActive.size(); k++) weightedSumError += (beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*signum(weightsActive[j][k]*weightsActive[k][j]);
 
-                float errorTerm = (lastReal[j]*lastCounter[j])*((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(beforelastCounter[j]*beforelastReal[j])*lastError[i]*signum(weightsActive[j][i]))*signum(weightsActive[j][i]*weightsActive[i][j])))*learningRate;
-                float errorTermI = (1.0-lastReal[j]*lastCounter[j])*((error[i]+(1.0-beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(1.0-beforelastCounter[j]*beforelastReal[j])*lastError[i]*signum(weightsActive[j][i]))*signum(weightsActive[j][i]*weightsActive[i][j])))*learningRate;
+                float errorTerm = ((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(beforelastCounter[j]*beforelastReal[j])*lastError[i]*signum(weightsActive[j][i]))*signum(weightsActive[j][i]*weightsActive[i][j])))*learningRate;
 
-                momentum[i][j] = errorTerm+0.9*momentum[i][j];
+                momentum[i][j] = (lastReal[j]*lastCounter[j])*errorTerm+0.9*momentum[i][j];
 
                 //if(fireCounter[j] == 1.0 )weightsActive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*lastCounter[i]*learningRate;
                 //else weightsInactive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*(1.0-lastCounter[i])*learningRate;
@@ -246,8 +245,8 @@ void NeuralCluster::train(float learningRate){
                 //else weightsInactive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*(1.0-lastCounter[i])*learningRate;
 
                 //weightsNeurons[j] += ((lastCounter[j]*lastReal[j])*error[i]+(lastCounter[i]*lastReal[i])*error[j])*learningRate*signum(weightsActive[i][j]);
-                weightsActive[i][j] += (errorTerm+momentum[i][j]*0.1);
-                weightsActive[i][j] = weightsActive[i][j]/(1.0+abs(error[j]+lastError[j]+beforeLasteError[j])*0.001);
+                weightsActive[i][j] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
+                weightsActive[i][j] = weightsActive[i][j]*(1.0-abs(error[j]*error[i])*0.01);
                 //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
                 //slope[i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
                 //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(lastReal[j]*lastCounter[j])*weightedSumError)*signum(weightsActive[j][i]*weightsActive[i][j]))*learningRate+momentum[i][j]*0.1);
