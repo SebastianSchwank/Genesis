@@ -53,7 +53,7 @@ private:
     float phase = 0;
     int numInputs = 16;//sizeof (input[0])/sizeof (input[0][0]);
     int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 32;
+    int numHiddens = 16;
     int numAttentions = 0;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;
