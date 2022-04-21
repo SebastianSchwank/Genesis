@@ -47,9 +47,9 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         weightsActive.push_back(weightColumnActive);
         weightsInactive.push_back(weightColumnInactive);
         weightsNeurons.push_back(1.0);
-        //weightsNeurons[i] = 10.0*((2.0*rand()/RAND_MAX)-1.0);
+        weightsNeurons[i] = 1.0*((2.0*rand()/RAND_MAX)-1.0);
         momentum.push_back(momentumColumn);
-        slope.push_back(2.0*((1.0*rand()/RAND_MAX-0.5)));
+        slope.push_back(1.0);
         error.push_back(0.02*((1.0*rand()/RAND_MAX-0.5)));
         lastError.push_back(0.01*((1.0*rand()/RAND_MAX-0.5)));
         beforeLasteError.push_back(0.01*((1.0*rand()/RAND_MAX-0.5)));
@@ -108,6 +108,10 @@ void NeuralCluster::resetSampler(bool randomize){
 
             beforelastReal[i] = 0.0;
             beforelastCounter[i] = 0.0;
+
+            error[i] = 0.0;
+            lastError[i] = 0.0;
+            beforeLasteError[i] = 0.0;
         }
 
         if(randomize){
@@ -190,9 +194,9 @@ void NeuralCluster::train(float learningRate){
             bool skip = false;
 
 
-            if((i >= 0)&&(j >= 0) && (i < numInputs) && (j < numInputs)){ weightsActive[i][j] = 0.0; weightsInactive[i][j] = 0.0;skip = true;}
+            //if((i >= 0)&&(j >= 0) && (i < numInputs) && (j < numInputs)){ weightsActive[i][j] = 0.0; weightsInactive[i][j] = 0.0;skip = true;}
 
-            if((i >= numInputs)&& (j >= numInputs) && (i < numInputs+numOutputs)&& (j < numInputs+numOutputs)){ weightsActive[i][j] = 0.0; weightsInactive[i][j] = 0.0; skip = true;}
+            if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs+numOutputs)){ weightsActive[i][j] = 0.0; weightsInactive[i][j] = 0.0; skip = true;}
             //if((i >= numInputs)&& (j >= numInputs) && (i < numInputs+numOutputs)&& (j < numInputs+numOutputs)){ weights[i][j] = 0.0; skip = true;}
 
             if((i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (j < numInputs+numOutputs+numHiddens) && (i < numInputs+numOutputs+numHiddens)){ weightsActive[i][j] = 0.0;weightsInactive[i][j] = 0.0; skip = true;}
@@ -227,7 +231,12 @@ void NeuralCluster::train(float learningRate){
                 //momentum[i][j] *= currentError;
                 //momentum[i][j] *= 0.9;
 
-                momentum[i][j] = (lastReal[j]*lastCounter[j])*(error[i]+(beforelastCounter[i]*beforelastReal[i])*lastError[j]*signum(weightsActive[i][j]*weightsActive[j][i]))*learningRate+0.99*momentum[i][j];
+                float weightedSumError = 0.0;
+                for(int k = 0; k < weightsActive.size(); k++) weightedSumError += (beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*signum(weightsActive[j][k]*weightsActive[k][j]);
+
+                float errorTerm = ((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(beforelastCounter[j]*beforelastReal[j])*lastError[i]*signum(weightsActive[j][i]))*signum(weightsActive[j][i]*weightsActive[i][j])))*learningRate;
+
+                momentum[i][j] = (lastReal[j]*lastCounter[j])*errorTerm+0.9*momentum[i][j];
 
                 //if(fireCounter[j] == 1.0 )weightsActive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*lastCounter[i]*learningRate;
                 //else weightsInactive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*(1.0-lastCounter[i])*learningRate;
@@ -236,7 +245,10 @@ void NeuralCluster::train(float learningRate){
                 //else weightsInactive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*(1.0-lastCounter[i])*learningRate;
 
                 //weightsNeurons[j] += ((lastCounter[j]*lastReal[j])*error[i]+(lastCounter[i]*lastReal[i])*error[j])*learningRate*signum(weightsActive[i][j]);
-                weightsActive[i][j] += (lastReal[j]*lastCounter[j])*((error[i]+beforelastCounter[i]*beforelastReal[i]*lastError[j]*signum(weightsActive[i][j]*weightsActive[j][i]))*learningRate+momentum[i][j]*0.1);
+                weightsActive[i][j] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
+                //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
+                //slope[i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
+                //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(lastReal[j]*lastCounter[j])*weightedSumError)*signum(weightsActive[j][i]*weightsActive[i][j]))*learningRate+momentum[i][j]*0.1);
                 //weightsActive[i][j] *= 0.9999;
                 //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*(error[i]+lastReal[i]*lastCounter[i]*error[j]*signum(weightsActive[j][i]))*learningRate;
 
@@ -540,7 +552,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             //samplerCounter[i] = minMax(integratorCounter[i]-OutputIntegratorCounter[i]);//+samples*samplerCounter[i])/(samples+1.0);
             //OutputSamplerCounter[i] = (minMax(OutputIntegratorCounter[i])+samples*OutputSamplerCounter[i])/(samples+1.0);
 
-            samplerCounter[i] =  minMax(integratorCounter[i]);
+            samplerCounter[i] =  minMax(slope[i]*integratorCounter[i]);
 
             //ActivityCounter[i] = (fireCounter[i]+samples*ActivityCounter[i])/(samples+1.0);
             EnergyFlowCounter[i] =  (samplerCounter[i]);
@@ -550,7 +562,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             //samplerReal[i] = minMax(integratorReal[i]-OutputIntegratorReal[i]);//+samples*samplerReal[i])/(samples+1.0);
             //OutputSamplerReal[i] = (minMax(OutputIntegratorReal[i])+samples*OutputSamplerReal[i])/(samples+1.0);
 
-            samplerReal[i] =  minMax(integratorReal[i]);
+            samplerReal[i] =  minMax(slope[i]*integratorReal[i]);
 
             //ActivityReal[i] = (fireReal[i]+samples*ActivityReal[i])/(samples+1.0);
             EnergyFlowReal[i] = (samplerReal[i]);
