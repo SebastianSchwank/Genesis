@@ -232,11 +232,20 @@ void NeuralCluster::train(float learningRate){
                 //momentum[i][j] *= 0.9;
 
                 float weightedSumError = 0.0;
-                for(int k = 0; k < weightsActive.size(); k++) weightedSumError += (beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*signum(weightsActive[j][k]*weightsActive[k][j]);
+                //for(int k = 0; k < weightsActive.size(); k++) weightedSumError += (beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*signum(weightsActive[j][k]*weightsActive[k][j]);
 
-                float errorTerm = ((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(beforelastCounter[j]*beforelastReal[j])*lastError[i]*signum(weightsActive[j][i]))*signum(weightsActive[j][i]*weightsActive[i][j])))*learningRate;
+                int k = i;
 
-                momentum[i][j] = (lastReal[j]*lastCounter[j])*errorTerm+0.9*momentum[i][j];
+                float errorTerm = error[i]*(1.0+((((lastCounter[j]*lastReal[j])*lastError[j])*(1.0+((beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*(weightsActive[j][k]))))*(weightsActive[i][j])))*learningRate;
+                //float errorTerm = (error[i]+((lastReal[i]*lastCounter[i]*lastError[j]+abs(lastError[j])*beforelastCounter[j]*beforelastReal[j]*beforeLasteError[k]*signum(weightsActive[j][k])))*signum(weightsActive[i][j]))*learningRate;
+
+
+                weightsActive[i][j] = weightsActive[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
+
+                momentum[i][j] = (lastReal[j]*lastCounter[j])*errorTerm+momentum[i][j]*0.9;
+
+                //momentum[i][j] = momentum[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
+                //momentum[i][j] = momentum[i][j]*(1.0-(lastReal[j]+lastCounter[j])*abs(error[j]*error[i])*learningRate);
 
                 //if(fireCounter[j] == 1.0 )weightsActive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*lastCounter[i]*learningRate;
                 //else weightsInactive[i][j] += ((lastReal[j]*lastCounter[j]))*(error[i])*(1.0-lastCounter[i])*learningRate;
@@ -246,7 +255,7 @@ void NeuralCluster::train(float learningRate){
 
                 //weightsNeurons[j] += ((lastCounter[j]*lastReal[j])*error[i]+(lastCounter[i]*lastReal[i])*error[j])*learningRate*signum(weightsActive[i][j]);
                 weightsActive[i][j] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
-                weightsActive[i][j] = weightsActive[i][j]*(1.0-abs(error[j]*error[i])*0.01);
+                //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
                 //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
                 //slope[i] += (lastReal[j]*lastCounter[j])*(errorTerm+momentum[i][j]*0.1);
                 //weightsActive[j][i] += (lastReal[j]*lastCounter[j])*((error[i]+(beforelastCounter[i]*beforelastReal[i])*(lastError[j]+(lastReal[j]*lastCounter[j])*weightedSumError)*signum(weightsActive[j][i]*weightsActive[i][j]))*learningRate+momentum[i][j]*0.1);
@@ -337,8 +346,7 @@ void NeuralCluster::trainBP(vector<float> target,float learningRate,int iteratio
 }
 
 float NeuralCluster::signum(float x){
-    if(x>0.0) return 1.0;
-    return -1.0;
+    return (2.0/(1.0+(exp(-x))))-1.0;
 }
 
 vector<float> NeuralCluster::getActivation(){
