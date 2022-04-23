@@ -236,7 +236,7 @@ void NeuralCluster::train(float learningRate){
 
                 int k = i;
 
-                float errorTerm = error[i]*(1.0+((((lastCounter[j]*lastReal[j])*lastError[j])*(1.0+((beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*(weightsActive[j][k]))))*(weightsActive[i][j])))*learningRate;
+                float errorTerm = error[i]*(1.0+((((lastCounter[j]*lastReal[j])*lastError[j])*(1.0+((beforelastCounter[k]*beforelastReal[k])*beforeLasteError[k]*signum(weightsActive[j][k]))))*signum(weightsActive[i][j])))*learningRate;
                 //float errorTerm = (error[i]+((lastReal[i]*lastCounter[i]*lastError[j]+abs(lastError[j])*beforelastCounter[j]*beforelastReal[j]*beforeLasteError[k]*signum(weightsActive[j][k])))*signum(weightsActive[i][j]))*learningRate;
 
 
