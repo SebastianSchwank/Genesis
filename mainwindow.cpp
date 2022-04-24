@@ -163,7 +163,7 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
-                       Cluster0->train(0.05);
+                       Cluster0->train(0.1);
 
                    }
                    out0 = Cluster0->getTarget();
@@ -211,7 +211,9 @@ void MainWindow::processNet(){
                     */
             }
 
+
       }
+        Cluster0->envolve();
 
         if(iteration%1 == 0){
 
