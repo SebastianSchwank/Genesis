@@ -163,7 +163,7 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
-                       Cluster0->train(0.1);
+                       Cluster0->train(0.05);
 
                    }
                    out0 = Cluster0->getTarget();
@@ -213,7 +213,7 @@ void MainWindow::processNet(){
 
 
       }
-        Cluster0->envolve();
+        //Cluster0->envolve();
 
         if(iteration%1 == 0){
 
@@ -229,20 +229,12 @@ void MainWindow::processNet(){
         }
 
 
-        float max = 0.0;
-        for(int x = 0; x < Cluster0->getActivation().size(); x++){
-            for(int y = 0; y < Cluster0->getActivation().size(); y++){
-                if(abs(Cluster0->getWeights()[y][x]) > max) max = abs(Cluster0->getWeights()[y][x]);
-            }
-        }
-
-
         for(int x = 0; x < Cluster0->getActivation().size(); x++){
             for(int y = 0; y < Cluster0->getActivation().size(); y++){
                 QColor col = QColor(128,128,128);
 
-                if(Cluster0->getWeights()[y][x] > 0.0) col = QColor(255.0*Cluster0->getWeights()[y][x]/max,0,0);
-                if(Cluster0->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*Cluster0->getWeights()[y][x]/max);
+                if(Cluster0->getWeights()[y][x] > 0.0) col = QColor(255.0*((2.0/(1.0+(exp(-Cluster0->getWeights()[y][x]*1.0))))-1.0),0,0);
+                if(Cluster0->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*((2.0/(1.0+(exp(-Cluster0->getWeights()[y][x]*1.0))))-1.0));
 
                 image->setPixel(x,y,col.rgb());
             }
