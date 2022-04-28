@@ -22,7 +22,7 @@ public:
     void inputData(vector<float> input,vector<float> output,bool inverted);
     void propergate(vector<float> input, vector<float> output, bool sleep, bool hiddenWrite, bool againstEmpty);
     vector<vector<float>> getWeights();
-    void train(float learningRate);
+    void train(float learningRate, int maxDepth, int samples);
     void removeNonlin(float learningRate);
     void trainBP(vector<float> target,float learningRate,int iterations);
     vector<float> getTarget();
@@ -87,6 +87,7 @@ private:
     vector<vector<int>>   firingMatrixCounter;
     vector<float>         neuronalActivity;
     vector<float>         backpropError;
+    vector<float>         backtracedError;
     float                 overallError;
 
     vector<float>         momentumVector;

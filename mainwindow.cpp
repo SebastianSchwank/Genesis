@@ -126,7 +126,8 @@ void MainWindow::processNet(){
                //int k = rand()%numOutputs;
 
                //Create empty vector as output placeholder
-                   vector<float> emptyV;
+                   vector<float> emptyVO;
+                   vector<float> emptyVI;
                //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
 
                    vector<float> inputV = MainWindow::inputFunction(2,numInputs,0.5*(k+2),phase);
@@ -134,6 +135,13 @@ void MainWindow::processNet(){
 
                    for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
                    targetV[k] = 1.0;
+
+
+                   for(int i = 0; i < numOutputs; i++) emptyVO.push_back(1.0);
+                   emptyVO[k] = 0.0;
+
+
+                   for(int i = 0; i < numInputs; i++) emptyVI.push_back(1.0-inputV[i]);
 
   /*
                    float max = 0.0;
@@ -149,7 +157,8 @@ void MainWindow::processNet(){
 
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 16; i++){
-                       Cluster0->propergate(inputV,emptyV,false,false,false);
+                       Cluster0->propergate(inputV,emptyVO,false,false,false);
+                       //Cluster0->propergate(emptyVI,emptyVO,false,false,false);
                    }
 
                    vector<float> out0 = Cluster0->getActivation();
@@ -163,7 +172,8 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
-                       Cluster0->train(0.1);
+                       Cluster0->train(0.1,7,128);
+                       //Cluster0->propergate(emptyVI,emptyVO,false,false,false);
 
                    }
                    out0 = Cluster0->getTarget();
