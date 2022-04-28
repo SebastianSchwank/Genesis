@@ -29,7 +29,6 @@ public:
     float signum(float x);
     float minMax(float x);
     void resetSampler(bool randomize);
-    void envolve();
 
     vector<float> getActivation();
 
@@ -85,9 +84,6 @@ private:
     vector<float>         weightsNeurons;
     vector<vector<float>> momentum;
     vector<vector<int>>   firingMatrixCounter;
-    vector<float>         neuronalActivity;
-    vector<float>         backpropError;
-    float                 overallError;
 
     vector<float>         momentumVector;
     int                   numInputs,numOutputs,numHiddens,numRekurrent;
