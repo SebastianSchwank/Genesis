@@ -122,15 +122,18 @@ void MainWindow::processNet(){
            for(int k = 0; k < (numOutputs); k++){
             //Training pass
 
-               float phase = (1.0*rand()/RAND_MAX);
+               //float phase = (1.0*rand()/RAND_MAX);
                //int k = rand()%numOutputs;
 
                //Create empty vector as output placeholder
                    vector<float> emptyV;
+                   vector<float> emptyVO;
                //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
 
                    vector<float> inputV = MainWindow::inputFunction(2,numInputs,0.5*(k+2),phase);
                    vector<float> targetV;// = MainWindow::inputFunction(2,numInputs,k+2,phase);
+
+                   for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
 
                    for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
                    targetV[k] = 1.0;
@@ -148,8 +151,8 @@ void MainWindow::processNet(){
 
 
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 8; i++){
-                       Cluster0->propergate(inputV,emptyV,false,false,false);
+                   for(int i = 0; i < 16; i++){
+                       Cluster0->propergate(inputV,emptyVO,false,false,false);
                    }
 
                    vector<float> out0 = Cluster0->getActivation();
@@ -161,7 +164,7 @@ void MainWindow::processNet(){
                    }
 
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 8; i++){
+                   for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
                        Cluster0->train(0.1);
 
@@ -239,8 +242,8 @@ void MainWindow::processNet(){
             for(int y = 0; y < Cluster0->getActivation().size(); y++){
                 QColor col = QColor(128,128,128);
 
-                if(Cluster0->getWeights()[y][x] > 0.0) col = QColor(255.0*Cluster0->getWeights()[y][x]/max,0,0);
-                if(Cluster0->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*Cluster0->getWeights()[y][x]/max);
+                if(Cluster0->getWeights()[y][x] > 0.0) col = QColor(255.0*(2.0/(1.0+(exp(-Cluster0->getWeights()[y][x])))-1.0),0,0);
+                if(Cluster0->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*(2.0/(1.0+(exp(-Cluster0->getWeights()[y][x])))-1.0));
 
                 image->setPixel(x,y,col.rgb());
             }
