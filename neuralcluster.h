@@ -49,7 +49,7 @@ private:
     vector<float>         lastReal;
     vector<float>         beforelastReal;
     vector<float>         polarityReal;
-    vector<float>         derived;
+    vector<float>         longTermMean;
 
     vector<float>         realActivity;
     vector<float>         counterActivity;
@@ -80,6 +80,7 @@ private:
 
     vector<float>         slope;
     vector<vector<float>> weightsActive;
+    vector<vector<float>> deltaMatrix;
     vector<vector<float>> weightsInactive;
     vector<float>         weightsNeurons;
     vector<vector<float>> momentum;

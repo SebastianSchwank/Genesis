@@ -22,7 +22,6 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         period.push_back(rand()%maxPeriod+1);
         counter.push_back(rand()%period[i]+1);
         slowness.push_back(1.0);
-        derived.push_back(0.0);
         momentumVector.push_back(0.0);
         //if(i > inputs+outputs) slowness[i] = 1.0*rand()/RAND_MAX;
         //slowness[i] = slowness[i]*slowness[i]*slowness[i];
@@ -31,6 +30,7 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
 
         vector<float> momentumColumn;
         vector<int> firingColumn;
+        vector<float> deltaColumn;
         for(int j = 0; j < inputs+outputs+hidden+attention+1; j++){
             //if((j+i)%2 ==0) weightColumn.push_back(-0.001);
             //else  weightColumn.push_back(0.001);
@@ -41,11 +41,13 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
             weightColumnInactive.push_back(0.2*((1.0*rand()/RAND_MAX-0.5)));
             momentumColumn.push_back(0.2*((1.0*rand()/RAND_MAX-0.5)));
             firingColumn.push_back(rand()%2);
+            deltaColumn.push_back(0.0);
 
         }
         firingMatrixCounter.push_back(firingColumn);
         weightsActive.push_back(weightColumnActive);
         weightsInactive.push_back(weightColumnInactive);
+        deltaMatrix.push_back(deltaColumn);
         weightsNeurons.push_back(1.0);
         //weightsNeurons[i] = 10.0*((2.0*rand()/RAND_MAX)-1.0);
         momentum.push_back(momentumColumn);
@@ -160,7 +162,7 @@ void NeuralCluster::train(float learningRate){
     beforeLasteError = lastError;
     lastError = error;
     float absMax = 0.0;
-    for(int i = 0; i < weightsActive.size(); i++){
+    for(int i = 0; i < weightsActive.size()-1; i++){
         //if((i >= numInputs) && (i < numInputs+numOutputs+numHiddens)) error[i] = (fireReal[i]-fireCounter[i]);
         //if(i < numInputs) error[numInputs+numOutputs+numHiddens+i] = (fireReal[i]-fireCounter[i]);
 
@@ -234,29 +236,67 @@ void NeuralCluster::train(float learningRate){
                 //momentum[i][j] *= 0.9;
                 errorTerm =   (error[i]);//+(lastError[j])*(1.0-abs(error[i]))*signum(-weightsActive[j][i]))*learningRate;
 
-                //weightsActive[i][j] = weightsActive[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
+                weightsActive[i][j] = weightsActive[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
 
                 float signu = 1.0;
 
-                if(i >= numInputs+numOutputs && j >= numInputs+numOutputs && i < weightsActive.size() && j < weightsActive.size()){
+                if(i >= numInputs+numOutputs && j >= numInputs+numOutputs ){
 
-                        if(abs(EnergyFlowReal[j]*error[j]*weightsActive[i][j]) > abs(EnergyFlowReal[i]*error[i]*weightsActive[j][i])) signu = -1.0;
-                        if(abs(EnergyFlowReal[j]*error[j]*weightsActive[i][j]) < abs(EnergyFlowReal[i]*error[i]*weightsActive[j][i])) signu = 1.0;
+                    float actI = (EnergyFlowCounter[i]+EnergyFlowReal[i])*0.5;
+                    float actJ = (EnergyFlowCounter[j]+EnergyFlowReal[j])*0.5;
+                    float errorDec = sqrt((error[i]*error[i]+error[j]*error[j]));
 
-                        momentum[j][i] += EnergyFlowReal[i]*EnergyFlowReal[j]*(signu*(1.0))*learningRate;
-                        momentum[i][j] -= EnergyFlowReal[i]*EnergyFlowReal[j]*(signu*(1.0))*learningRate;
+                    int k = rand()%weightsActive.size();
+                    while(!(i != k && j != k)) k = rand()%weightsActive.size();
+/*
+                    weightsActive[i][j] -= (1.0-(error[j]))*(1.0+(error[j]))*error[j]*actI*actJ*(weightsActive[i][j])*(1.0-abs(error[i]))*abs(error[i]);
+                    weightsActive[j][i] += (1.0-(error[j]))*(1.0+(error[j]))*error[j]*actI*actJ*(weightsActive[i][j])*(1.0-abs(error[i]))*abs(error[i]);
+*/
+                    weightsActive[i][j] += error[i]*errorDec*actJ*abs(signum(error[j]*actI*weightsActive[j][i]))*learningRate;
+                    weightsActive[j][i] -= error[i]*errorDec*actI*abs(signum(error[j]*actJ*weightsActive[j][i]))*weightsActive[j][i]*learningRate;
 
-                        momentum[j][i] *= 0.9;
-                        momentum[i][j] *= 0.9;
 
-                        weightsActive[j][i] += EnergyFlowReal[i]*EnergyFlowReal[j]*error[j]*signu*(1.0+0.0*momentum[j][i])*learningRate;
-                        weightsActive[i][j] -= EnergyFlowReal[i]*EnergyFlowReal[j]*error[i]*signu*(1.0+0.0*momentum[i][j])*learningRate;
+                    //if(((actI*sqrt(error[i]*error[i])*sqrt(weightsActive[j][i]*weightsActive[j][i])) > (actJ*sqrt(error[j]*error[j])*sqrt(weightsActive[i][j]*weightsActive[i][j]))))
+
+
+
+/*
+                        float errorBounceI = error[j];
+                        float errorI = 0.0;
+
+
+                        float errorBounceJ = error[i];
+                        float errorJ = 0.0;
+
+
+                        for(int i = 0; i < 2; i++){
+                            errorI = signum(EnergyFlowReal[j]*errorBounceI*weightsActive[i][j]);
+                            errorBounceI -= signum(EnergyFlowReal[i]*errorI*abs(error[i])*weightsActive[j][i]);
+
+                            errorJ = signum(EnergyFlowReal[i]*errorBounceJ*weightsActive[j][i]);
+                            errorBounceJ -= signum(EnergyFlowReal[j]*(errorJ*abs(error[j]))*weightsActive[i][j]);
+                        }
+*/
+
+                        //float equilibrium = ((error[i])+(signum(EnergyFlowReal[j]*error[j]*weightsActive[i][j]))) + ((error[j])+(signum(EnergyFlowReal[i]*error[i]*weightsActive[j][i])));
 
                 }else{
 
-                    momentum[i][j] = lastCounter[j]*lastReal[j]*error[i]*learningRate+0.9*momentum[i][j];
+                    if(i > numInputs+numOutputs && j < numInputs ){
 
-                    weightsActive[i][j] += lastCounter[j]*lastReal[j]*(error[i]+momentum[i][j]*0.1)*learningRate;
+                        float actI = EnergyFlowCounter[i]*EnergyFlowReal[i];
+                        float actJ = EnergyFlowCounter[j]*EnergyFlowReal[j];
+
+                        momentum[i][j] = actJ*error[i]*(1.0-(error[j]))*(1.0+(error[j]))*learningRate+0.9*momentum[i][j];
+
+                        weightsActive[i][j] += actJ*(error[i]*(1.0-(error[j]))*(1.0+(error[j]))+momentum[i][j]*0.1)*learningRate;
+
+                    }else{
+
+                    momentum[i][j] = (lastCounter[j]*lastReal[j])*error[i]*(1.0-(error[j]))*(1.0+(error[j]))*learningRate+0.9*momentum[i][j];
+
+                    weightsActive[i][j] += (lastCounter[j]*lastReal[j])*(error[i]*(1.0-(error[j]))*(1.0+(error[j]))+momentum[i][j]*0.1)*learningRate;
+                    }
 
                 }
 
@@ -339,6 +379,21 @@ void NeuralCluster::train(float learningRate){
         //weights[i][i] += lastCounter[i]*(realNetActivation[i]-counterActivation[i])*learningRate;
     }
 
+/*
+    float absWeights = 0.0;
+
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            absWeights += abs(weightsActive[i][j]);
+        }
+    }
+
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()*weightsActive.size()/absWeights;
+        }
+    }
+*/
 
 
 }
@@ -473,6 +528,21 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
     vector<float> deltaError;
 
 
+    float absEnergyReal = 0.0;
+    float absEnergyCounter = 0.0;
+
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            absEnergyCounter += abs(weightsActive[i][j]*fireCounter[j]);
+        }
+    }
+
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            absEnergyReal += abs(weightsActive[i][j]*fireReal[j]);
+        }
+    }
+
     float sumCounterClassyfier = 0;
 
         for(int i = 0; i < weightsActive.size()-1; i++){
@@ -490,8 +560,8 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
 
             for(int j = 0; j < weightsActive[i].size(); j++){
 
-                    EnergyCounter +=  fireCounter[j]*(weightsActive[i][j]);
-                    EnergyReal += fireReal[j]*(weightsActive[i][j]);
+                    EnergyCounter +=  (fireCounter[j])*(weightsActive[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();
+                    EnergyReal += (fireReal[j])*(weightsActive[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();
 
                     /*
                     if(fireCounter[j] == 1.0) EnergyCounter +=  (weightsActive[i][j])*(lastCounter[j]);
@@ -558,15 +628,14 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             //slowness[i] = 1.0*rand()/RAND_MAX;
         }
 
+        float energyAbs = 0.0;
 
-        for(int i = numInputs; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
-            //samplerCounter[i] = minMax(integratorCounter[i]-OutputIntegratorCounter[i]);//+samples*samplerCounter[i])/(samples+1.0);
-            //OutputSamplerCounter[i] = (minMax(OutputIntegratorCounter[i])+samples*OutputSamplerCounter[i])/(samples+1.0);
+        for(int i = 0; i < weightsActive.size(); i++){
+            //samplerReal[i] = minMax(integratorReal[i]-OutputIntegratorReal[i]);//+samples*samplerReal[i])/(samples+1.0);
+            //OutputSamplerReal[i] = (minMax(OutputIntegratorReal[i])+samples*OutputSamplerReal[i])/(samples+1.0);
 
-            samplerCounter[i] =  minMax(integratorCounter[i]);
-
-            //ActivityCounter[i] = (fireCounter[i]+samples*ActivityCounter[i])/(samples+1.0);
-            EnergyFlowCounter[i] =  samplerCounter[i];
+            samplerReal[i] =  minMax(integratorReal[i]);
+            energyAbs +=  samplerReal[i];
         }
 
         for(int i = numInputs+numOutputs; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
@@ -576,8 +645,30 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             samplerReal[i] =  minMax(integratorReal[i]);
 
             //ActivityReal[i] = (fireReal[i]+samples*ActivityReal[i])/(samples+1.0);
+            //EnergyFlowReal[i] = 0.5*(weightsActive.size())*samplerReal[i]/energyAbs;
             EnergyFlowReal[i] = samplerReal[i];
 
+        }
+
+        energyAbs = 0.0;
+
+        for(int i = 0; i < weightsActive.size(); i++){
+            //samplerCounter[i] = minMax(integratorCounter[i]-OutputIntegratorCounter[i]);//+samples*samplerCounter[i])/(samples+1.0);
+            //OutputSamplerCounter[i] = (minMax(OutputIntegratorCounter[i])+samples*OutputSamplerCounter[i])/(samples+1.0);
+
+            samplerCounter[i] =  minMax(integratorCounter[i]);
+
+            //ActivityCounter[i] = (fireCounter[i]+samples*ActivityCounter[i])/(samples+1.0);
+            energyAbs +=  samplerCounter[i];
+        }
+
+        for(int i = numInputs; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
+            //samplerCounter[i] = minMax(integratorCounter[i]-OutputIntegratorCounter[i]);//+samples*samplerCounter[i])/(samples+1.0);
+            //OutputSamplerCounter[i] = (minMax(OutputIntegratorCounter[i])+samples*OutputSamplerCounter[i])/(samples+1.0);
+
+            //ActivityCounter[i] = (fireCounter[i]+samples*ActivityCounter[i])/(samples+1.0);
+            //EnergyFlowCounter[i] = 0.5*(weightsActive.size())*samplerCounter[i]/energyAbs;
+            EnergyFlowCounter[i] =  samplerCounter[i];
         }
 
         inputData(input,output,againstEmpty);
