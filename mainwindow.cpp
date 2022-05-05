@@ -166,9 +166,10 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
-                       Cluster0->train(0.5);
+                       Cluster0->applyLearning();
+                       Cluster0->train(0.01);
                    }
-                   Cluster0->applyLearning();
+                   //Cluster0->resetDeltaMatrix();
 
 
                    out0 = Cluster0->getTarget();

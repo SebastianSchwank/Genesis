@@ -30,6 +30,7 @@ public:
     float minMax(float x);
     void resetSampler(bool randomize);
     void applyLearning();
+    void resetDeltaMatrix();
 
     vector<float> getActivation();
 
