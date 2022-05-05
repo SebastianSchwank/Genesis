@@ -202,7 +202,7 @@ void NeuralCluster::train(float learningRate){
             //if((i >= numInputs)&& (j >= numInputs) && (i < numInputs+numOutputs)&& (j < numInputs+numOutputs)){ weights[i][j] = 0.0; skip = true;}
 
             //if((i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (j < numInputs+numOutputs+numHiddens) && (i < numInputs+numOutputs+numHiddens)){ weightsActive[i][j] = 0.0;weightsInactive[i][j] = 0.0; skip = true;}
-            if(i == j){ weightsActive[i][j] = 0.0;weightsInactive[i][j] = 0.0; skip = true;}
+            //if(i == j){ weightsActive[i][j] = 0.0;weightsInactive[i][j] = 0.0; skip = true;}
 
             //if((i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (j < numInputs+numOutputs+numHiddens) && (i < numInputs+numOutputs+numHiddens)){ weights[i][j] = 0.0; skip = true;}
 
@@ -267,7 +267,7 @@ void NeuralCluster::train(float learningRate){
 
 
                     deltaMatrix[i][j] += actJ*(2.0*rand()/RAND_MAX-1.0)*abs(error[i])*learningRate;
-                    deltaMatrix[i][j] -= actJ*abs(error[i])*abs(error[j])*signum(weightsActive[i][j])*learningRate;
+                    //deltaMatrix[i][j] -= actJ*abs(error[i])*abs(error[j])*signum(weightsActive[i][j])*learningRate;
 
                     //weightsActive[j][i] -= abs(error[i])*actJ*(error[i]+signum((actJ*(error[j])*weightsActive[i][j])))*errorDec*learningRate*0.1;
                     //weightsActive[j][i] -= actJ*(error[i]+signum((actJ*(error[j])*weightsActive[i][j])))*errorDec*learningRate;
@@ -300,9 +300,12 @@ void NeuralCluster::train(float learningRate){
                 }else{
 
 
-                    momentum[i][j] = (lastCounter[j]*lastReal[j])*error[i]*(1.0+error[j])*(1.0-error[j])*learningRate+0.9*momentum[i][j];
+                    float actI = (EnergyFlowCounter[i]);
+                    float actJ = (EnergyFlowCounter[j]);
 
-                    deltaMatrix[i][j] += lastCounter[j]*lastReal[j]*(error[i]*(1.0+error[j])*(1.0-error[j])+momentum[i][j]*0.1)*learningRate;
+                    momentum[i][j] = (lastCounter[j]*lastReal[j])*error[i]*learningRate+0.9*momentum[i][j];
+
+                    deltaMatrix[i][j] += lastCounter[j]*lastReal[j]*(error[i]+momentum[i][j]*0.1)*learningRate;
 
                 }
 
@@ -417,10 +420,17 @@ void NeuralCluster::applyLearning(){
             float errorDecI = sqrt(error[i]*error[i]);
             float errorDevI = errorDec-errorDecLast;
 
-            float signum = 1.0;
-            if(errorDev < 0.0 && errorDevI < 0.0) signum = -1.0;
+            weightsActive[i][j] += (lastCounter[j]*lastReal[j])*(deltaMatrix[i][j])*(errorDecI*errorDec*errorDevI);
+            //deltaMatrix[i][j] = deltaMatrix[i][j]-deltaMatrix[i][j]*(1.0-errorDec);
 
-            weightsActive[i][j] += (lastCounter[j]*lastReal[j])*(deltaMatrix[i][j])*(errorDev*errorDevI);
+/*
+            float errorDecLastJ = sqrt(lastError[j]*lastError[j]);
+            float errorDecJ = sqrt(error[j]*error[j]);
+            float errorDevJ = errorDec-errorDecLast;
+
+            weightsActive[j][i] += (lastCounter[j]*lastReal[j])*(deltaMatrix[j][i])*(errorDecJ*errorDec*errorDevJ)*signum(weightsActive[i][j]*weightsActive[j][i]);
+*/
+
 /*
             float errorDecLastJ = (1.0/sqrt(2.0))*sqrt(lastError[j]*lastError[j]);
             float errorDecJ = (1.0/sqrt(2.0))*sqrt(error[j]*error[j]);

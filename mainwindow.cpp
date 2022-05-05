@@ -218,6 +218,7 @@ void MainWindow::processNet(){
             }
 
       }
+        //Cluster0->resetDeltaMatrix();
 
         if(iteration%1 == 0){
 
