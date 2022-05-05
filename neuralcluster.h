@@ -29,6 +29,7 @@ public:
     float signum(float x);
     float minMax(float x);
     void resetSampler(bool randomize);
+    void applyLearning();
 
     vector<float> getActivation();
 

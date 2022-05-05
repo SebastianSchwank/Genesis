@@ -167,8 +167,10 @@ void MainWindow::processNet(){
                    for(int i = 0; i < 16; i++){
                        Cluster0->propergate(inputV,targetV,false,false,false);
                        Cluster0->train(0.5);
-
                    }
+                   Cluster0->applyLearning();
+
+
                    out0 = Cluster0->getTarget();
                    impulseResonses.push_back(out0);
 
