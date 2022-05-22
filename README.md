@@ -1,6 +1,6 @@
 Just try to minimize the distance between what the one neuron "says" and what the other neuron "understands" by:
 
-weightsActive[i][j] += actJ*abs(0.5-sigmoid((wheightedNeuronOutputSignal[j]-wheightedNeuronInputSignal[i])))*(1.0-2.0*rand()/RAND_MAX)*learningRate;
+weightsActive[i][j] += actJ x abs(0.5-sigmoid((wheightedNeuronOutputSignal[j]-wheightedNeuronInputSignal[i]))) x (1.0-2.0 x rand()/RAND_MAX) x learningRate;
 
 
 #Bi-Neuronal Network
