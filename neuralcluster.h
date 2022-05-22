@@ -56,8 +56,12 @@ private:
     vector<float>         realActivity;
     vector<float>         counterActivity;
 
-    vector<float>         samplerReal;
-    vector<float>         samplerCounter;
+    vector<float>         samplerRealInputSignal,samplerRealOutputSignal;
+    vector<float>         samplerCounterInputSignal,samplerCounterOutputSignal;
+
+    vector<float>         samplerRealInput,samplerRealOutput,samplerRealEnergyBillance;
+    vector<float>         samplerCounterInput,samplerCounterOutput,samplerCounterEnergyBillance;
+
 
 
     vector<float>         OutputSamplerReal;
@@ -82,8 +86,8 @@ private:
 
     vector<float>         slope;
     vector<vector<float>> weightsActive;
+    vector<vector<float>> biasesActive;
     vector<vector<float>> deltaMatrix;
-    vector<vector<float>> weightsInactive;
     vector<float>         weightsNeurons;
     vector<vector<float>> momentum;
     vector<vector<int>>   firingMatrixCounter;
