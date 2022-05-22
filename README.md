@@ -1,3 +1,8 @@
+Just try to minimize the distance between what the one neuron "says" and what the other neuron "understands" by:
+
+weightsActive[i][j] += actJ*abs(0.5-sigmoid((wheightedNeuronOutputSignal[j]-wheightedNeuronInputSignal[i])))*(1.0-2.0*rand()/RAND_MAX)*learningRate;
+
+
 #Bi-Neuronal Network
 
 - Every neuron calculate the error for itself
