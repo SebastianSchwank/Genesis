@@ -1,3 +1,5 @@
+Optimizing the signal-efficiency finally works.
+
 Just try to minimize the distance between what the one neuron "says" (=sum of activation on output-weights) and what the other neuron "understands" (=sum of activation on input-weights) by:
 
 weightsActive[i][j] += actJ x abs(0.5-sigmoid((wheightedNeuronOutputSignal[j]-wheightedNeuronInputSignal[i]))) x (1.0-2.0 x rand()/RAND_MAX) x learningRate;
