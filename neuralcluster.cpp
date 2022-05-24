@@ -275,7 +275,7 @@ void NeuralCluster::train(float learningRate){
                     //momentum[i][j] = actJ*actI*signum((actJ*weightsActive[i][j])/(1.0+samplerRealOutput[j])-((samplerRealInputSignal[i])/(1.0+samplerRealInput[i])))+momentum[i][j]*0.9;
 
 
-                    weightsActive[i][j] += (actJ*actI*(1.0-actI)*(signum((((samplerRealOutputSignal[j]*weightsActive[i][j])/(1.0+samplerRealOutput[j]))-(samplerRealInputSignal[i]/(1.0+samplerRealInput[i]))))))*learningRate;
+                    weightsActive[i][j] += (actJ*actI*(signum((((samplerRealOutputSignal[j]*weightsActive[i][j])/(1.0+samplerRealOutput[j]))-(samplerRealInputSignal[i]/(1.0+samplerRealInput[i]))))))*learningRate;
                     //weightsActive[j][i] += actJ*actI*((signum((samplerRealOutputSignal[j]*weightsActive[i][j]-samplerRealInputSignal[i])))+0.1*momentum[i][j])*learningRate;
 
                     //weightsActive[i][weightsActive.size()-1] -= (1.0-(1.0-actJ*actI))*actJ*actI*((signum((samplerRealOutputSignal[j]*weightsActive[i][j]-samplerRealInputSignal[i])))+0.0*momentum[i][j])*learningRate;
