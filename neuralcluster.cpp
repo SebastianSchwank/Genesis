@@ -31,6 +31,7 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         vector<float> momentumColumn;
         vector<int> firingColumn;
         vector<float> deltaColumn;
+        vector<float> relativeBehaveColumn;
         for(int j = 0; j < inputs+outputs+hidden+attention+1; j++){
             //if((j+i)%2 ==0) weightColumn.push_back(-0.001);
             //else  weightColumn.push_back(0.001);
@@ -41,9 +42,11 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
             weightColumnInactive.push_back(0.2*((1.0*rand()/RAND_MAX-0.5)));
             momentumColumn.push_back(0.2*((1.0*rand()/RAND_MAX-0.5)));
             firingColumn.push_back(rand()%2);
-            deltaColumn.push_back(0.0);
+            deltaColumn.push_back(0.01*(1.0-2.0*rand()/RAND_MAX));
+            relativeBehaveColumn.push_back(0.0);
 
         }
+        relativeBehaviour.push_back(relativeBehaveColumn);
         firingMatrixCounter.push_back(firingColumn);
         weightsActive.push_back(weightColumnActive);
         biasesActive.push_back(weightColumnInactive);
@@ -56,7 +59,8 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         lastError.push_back(0.01*((1.0*rand()/RAND_MAX-0.5)));
         beforeLasteError.push_back(0.01*((1.0*rand()/RAND_MAX-0.5)));
         derivedError.push_back(0.0);
-
+        mean.push_back(0.5);
+        meanChanging.push_back(0.5);
 
         samplerRealInput.push_back(0.0);
         samplerRealOutput.push_back(0.0);
@@ -86,6 +90,9 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         ActivityCounter.push_back(1.0);
         beforelastReal.push_back(0.0);
         beforelastCounter.push_back(0.0);
+        approxError.push_back(0.0);
+        outputError.push_back(0.0);
+        inputError.push_back(0.0);
     }
 
     fireCounter[fireCounter.size()-1] = 1.0;
@@ -116,6 +123,9 @@ void NeuralCluster::resetSampler(bool randomize){
             EnergyFlowReal[i] = 0.5;
             EnergyFlowCounter[i] = 0.5;
 
+            mean[i] = 0.5;
+            meanChanging[i] = 0.5;
+
             fireCounter[i] = 0.5;
             samplerRealInput[i]=(0.0);
             samplerRealOutput[i]=(0.0);
@@ -145,7 +155,7 @@ void NeuralCluster::removeNonlin(float learningRate){
 
 }
 
-void NeuralCluster::train(float learningRate){
+void NeuralCluster::train(float learningRate, float sqError){
 /*
     float maxVal = 0.0;
     vector<int> neuronsChain;
@@ -179,13 +189,13 @@ void NeuralCluster::train(float learningRate){
         //if((i >= numInputs) && (i < numInputs+numOutputs+numHiddens)) error[i] = (fireReal[i]-fireCounter[i]);
         //if(i < numInputs) error[numInputs+numOutputs+numHiddens+i] = (fireReal[i]-fireCounter[i]);
 
-        error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
+        //error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
         //if(i >= numInputs+numOutputs) error[i] = -error[i];
         //slope[i] += (slope[i]-(fireReal[i]-fireCounter[i])*(fireReal[i]-fireCounter[i])*fireCounter[i]*0.25)*0.001;
         //if(i > numInputs+numOutputs+numHiddens) error[i] = (fireReal[i+numInputs+numOutputs+numHiddens]-fireCounter[i+numInputs+numOutputs+numHiddens]);
 
-        derivedError[i] = (error[i])/((error[i]*lastError[i]));
-        if(derivedError[i] != derivedError[i]) derivedError[i] = 0.0;
+        //derivedError[i] = (sqError[i])/((sqError[i]*lastError[i]));
+        //if(derivedError[i] != derivedError[i]) derivedError[i] = 0.0;
         //cout << i << ":" << derivedError[i] << " ";
 
         float errorTerm = 0.0;
@@ -234,6 +244,16 @@ void NeuralCluster::train(float learningRate){
 
 
 
+            //weightsActive[i][j] -= signum(weightsActive[i][j])*actJ*actI*(learningRate)*0.1*sqError;
+            //weightsActive[j][i] -= signum(weightsActive[j][i])*actJ*actI*(learningRate)*0.1*sqError;
+
+            inputError[i] *= (sqError);
+            outputError[i] *= (sqError);
+
+            //error[i] += signum(-samplerRealInputSignal[i])*(sqError);
+
+            inputError[i] += signum(-samplerRealInputSignal[i])*(sqError);
+            outputError[i] += signum(samplerRealOutputSignal[i])*(1.0-sqError);
 
             if(!skip){
 
@@ -246,21 +266,46 @@ void NeuralCluster::train(float learningRate){
                 //momentum[i][j] *= 0.9;
                 errorTerm =   (error[i]);//+(lastError[j])*(1.0-abs(error[i]))*signum(-weightsActive[j][i]))*learningRate;
 
-                weightsActive[i][j] = weightsActive[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
+                //weightsActive[i][j] = weightsActive[i][j]*(1.0-(lastReal[j]*lastCounter[j])*abs(error[j]*error[i])*learningRate);
 
                 float signu = 1.0;
 
-                if(i >= numInputs+numOutputs && j >= numInputs+numOutputs ){
 
-                    float actI = (EnergyFlowCounter[i]*EnergyFlowReal[i]);
-                    float actJ = (EnergyFlowCounter[j]*EnergyFlowReal[j]);
-                    float errorDecLast = (1.0/sqrt(2))*sqrt(lastError[i]*lastError[i]+lastError[j]*lastError[j]);
-                    float errorDec = (1.0/sqrt(2))*sqrt(error[i]*error[i]+error[j]*error[j]);
-                    float errrorDev = errorDec-errorDecLast;
+                if(i >= 0 && j >= 0){
+
+                    float actI = (EnergyFlowReal[i]);
+                    float actJ = (EnergyFlowReal[j]);
 
                     int k = rand()%weightsActive.size();
                     while(!(i != k && j != k)) k = rand()%weightsActive.size();
+
+
+                    //weightsActive[i][j] += actJ*signum((actJ*abs(outputError[j])*weightsActive[i][j]-actI*abs(inputError[i])*weightsActive[j][i]))*weightsActive[i][j]*0.001*(sqError);
+                    //weightsActive[j][i] -= signum((actJ*abs(outputError[j]*weightsActive[i][j])-actI*abs(inputError[i]*weightsActive[j][i])))*weightsActive[j][i]*0.001*(sqError);
+                    //weightsActive[j][i] -= actI*signum((abs(inputError[j])-abs(outputError[i]))*weightsActive[j][i])*0.001*sqError;
+
+                    if(sqError-lastErrorSave < 0.0){
+
+                        weightsActive[i][j] += deltaMatrix[i][j];
+                        deltaMatrix[i][j] = (1.0-actJ)*(1.0-sqError)*deltaMatrix[i][j];
+                    }
+
+                    deltaMatrix[i][j] += actJ*(1.0-2.0*rand()/RAND_MAX)*sqError*0.01;
+                    deltaMatrix[i][j] -= actJ*weightsActive[i][j]*0.01;
+                    //weightsActive[i][j] -= (actJ*sqError)*weightsActive[i][j]*0.0001;
+                    //weightsActive[i][j] -= actI*signum(abs(inputError[j]*actI)-abs(inputError[i]))*weightsActive[i][j]*0.001*(sqError);
+
+
+
+
+                    //weightsActive[j][i] += actI*signum(minMax(inputError[i])*(1.0-minMax(inputError[i])*outputError[i]))*0.001;
+                    //weightsActive[j][i] -= actJ*(error[i]-error[j])*0.001*(sqError);
+                    //weightsActive[j][i] -= actJ*error[i]*0.001;
+
 /*
+                    approxError[i] += signum(deltaMatrix[i][j])*actJ*actI*(1.0-actI)*0.1*sqError;
+                    approxError[j] -= signum(deltaMatrix[i][j])*actJ*actI*(1.0-actI)*0.1*sqError;
+
                     weightsActive[i][j] -= (1.0-(error[j]))*(1.0+(error[j]))*error[j]*actI*actJ*(weightsActive[i][j])*(1.0-abs(error[i]))*abs(error[i]);
                     weightsActive[j][i] += (1.0-(error[j]))*(1.0+(error[j]))*error[j]*actI*actJ*(weightsActive[i][j])*(1.0-abs(error[i]))*abs(error[i]);
 */
@@ -275,7 +320,39 @@ void NeuralCluster::train(float learningRate){
                     //momentum[i][j] = actJ*actI*signum((actJ*weightsActive[i][j])/(1.0+samplerRealOutput[j])-((samplerRealInputSignal[i])/(1.0+samplerRealInput[i])))+momentum[i][j]*0.9;
 
 
-                    weightsActive[i][j] += (actJ*actI*(signum((((samplerRealOutputSignal[j]*weightsActive[i][j])/(1.0+samplerRealOutput[j]))-(samplerRealInputSignal[i]/(1.0+samplerRealInput[i]))))))*learningRate;
+                    //weightsActive[i][j] += (actJ)*(signum(((((samplerRealOutputSignal[i])/(1.0+samplerRealOutput[j])))-((samplerRealInputSignal[i]/(1.0+samplerRealInput[i]))))))*learningRate;
+
+                    //weightsActive[i][weightsActive.size()-1] += (1.0-(1.0-actJ*actI))*actJ*actI*(signum(((((samplerRealOutputSignal[j])*(samplerRealEnergyBillance[j])))-((samplerRealInputSignal[i]*weightsActive[i][j]*(-samplerRealEnergyBillance[i]))))))*learningRate;
+
+                    //weightsActive[i][j] -= actJ*actI*((((samplerRealInputSignal[j]*samplerRealOutputSignal[j]))/(1.0+samplerRealOutput[j]+samplerRealInput[j]))-(((samplerRealInputSignal[i]*samplerRealOutputSignal[i]))/(1.0+samplerRealInput[i]+samplerRealOutput[i])))*learningRate;
+                    //weightsActive[i][weightsActive.size()-1] += (1.0-(1.0-actJ*actI))*actJ*actI*((((samplerRealInputSignal[j]*samplerRealOutputSignal[j]))/(1.0+samplerRealOutput[j]+samplerRealInput[j]))-(((samplerRealInputSignal[i]*samplerRealOutputSignal[i]))/(1.0+samplerRealInput[i]+samplerRealOutput[i])))*learningRate;
+                    //Does rand() work ?
+
+                    //weightsActive[j][i] -= actJ*actI*(signum(((((samplerRealOutputSignal[j]*weightsActive[i][j])/(1.0+samplerRealOutput[j]))-((samplerRealInputSignal[i])/(1.0+samplerRealInput[i]))))))*learningRate;
+                    //weightsActive[i][j] -= actJ*actI*(signum(samplerRealEnergyBillance[i]*weightsActive[i][j]))*learningRate;
+
+
+                    //weightsActive[i][weightsActive.size()-1] -= (actJ*actI*(1.0-(1.0-actJ*actI))*(signum((((samplerRealOutputSignal[j]*weightsActive[i][j])/(1.0+samplerRealOutput[j]))-(samplerRealInputSignal[i]/(1.0+samplerRealInput[i]))))))*learningRate;
+                    /*
+                    float sumMul = 0.0;
+                    for(int k = numInputs+numOutputs; k < weightsActive.size(); k++){
+
+                        if(k != i && k != j){
+                            float actK = (EnergyFlowCounter[k]+EnergyFlowReal[k])*0.5;
+
+                            weightsActive[k][j] += actK*(actI+actJ)*0.5*(1.0-2.0*rand()/RAND_MAX)*(1.0-abs(actI-actJ))*learningRate;
+                            weightsActive[k][i] += actK*(actI+actJ)*0.5*(1.0-2.0*rand()/RAND_MAX)*(1.0-abs(actI-actJ))*learningRate;
+                        }
+                    }
+                    */
+
+                    /*
+                    weightsActive[j][i] += actJ*actI*(actJ*minMax(mean[i])-actI*minMax(mean[j]))*learningRate;
+                    weightsActive[i][j] -= actJ*actI*(actJ*minMax(mean[i])-actI*minMax(mean[j]))*learningRate;
+                    */
+
+
+
                     //weightsActive[j][i] += actJ*actI*((signum((samplerRealOutputSignal[j]*weightsActive[i][j]-samplerRealInputSignal[i])))+0.1*momentum[i][j])*learningRate;
 
                     //weightsActive[i][weightsActive.size()-1] -= (1.0-(1.0-actJ*actI))*actJ*actI*((signum((samplerRealOutputSignal[j]*weightsActive[i][j]-samplerRealInputSignal[i])))+0.0*momentum[i][j])*learningRate;
@@ -291,7 +368,9 @@ void NeuralCluster::train(float learningRate){
                     //weightsActive[j][weightsActive.size()-1] += (1.0-(1.0-actI*actJ))*actJ*actI*signum(samplerCounterEnergyBillance[i]*samplerCounterInputSignal[i])*learningRate*weightsActive[j][i]*0.1;
 
 
-                    //weightsActive[i][j] += abs(signum(actJ*weightsActive[i][j]))*(error[i])*errorDec*learningRate;
+                    //weightsActive[i][j] -= actI*signum((actJ-weightsActive[i][j]*actI))*(1.0-meanChanging[i])*learningRate;
+                    //weightsActive[i][j] += actJ*((1.0-actJ)-weightsActive[i][j]*actI)*(1.0-meanChanging[i])*learningRate;
+                    //weightsActive[i][j] -= actJ*(actJ-weightsActive[i][j]*(actI))*(1.0-meanChanging[i])*learningRate;
 
 
                     //deltaMatrix[i][j] += actJ*(2.0*rand()/RAND_MAX-1.0)*abs(error[i])*learningRate;
@@ -333,7 +412,7 @@ void NeuralCluster::train(float learningRate){
 
                     momentum[i][j] = (lastCounter[j]*lastReal[j])*error[i]*learningRate+0.9*momentum[i][j];
 
-                    weightsActive[i][j] += lastCounter[j]*lastReal[j]*(error[i]+momentum[i][j]*0.1)*learningRate;
+                    weightsActive[i][j] += (lastCounter[j]*lastReal[j])*(error[i]+momentum[i][j]*0.1)*learningRate;
 
                 }
 
@@ -416,25 +495,25 @@ void NeuralCluster::train(float learningRate){
         //weights[i][i] += lastCounter[i]*(realNetActivation[i]-counterActivation[i])*learningRate;
     }
 
+
 /*
-    float absWeights = 0.0;
-
     for(int i = 0; i < weightsActive.size(); i++){
+        float absWeights = 0.0;
         for(int j = 0; j < weightsActive.size(); j++){
-            absWeights += abs(weightsActive[i][j]);
+            absWeights += abs(weightsActive[j][i])+abs(weightsActive[i][j]);
         }
-    }
-
-    for(int i = 0; i < weightsActive.size(); i++){
         for(int j = 0; j < weightsActive.size(); j++){
-            weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()*weightsActive.size()/absWeights;
+            weightsActive[j][i] = (weightsActive[j][i])*2.0*weightsActive.size()/absWeights;
+            weightsActive[i][j] = (weightsActive[i][j])*2.0*weightsActive.size()/absWeights;
         }
     }
 */
 
+        lastErrorSave = sqError;
 
 }
 void NeuralCluster::applyLearning(){
+
 
     vector<float> energyBillance;
     vector<float> activationDifference;
@@ -445,35 +524,120 @@ void NeuralCluster::applyLearning(){
 
     }
 
-    for(int i = numInputs+numOutputs; i < weightsActive.size()-1; i++){
-        error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
-        for(int j = numInputs+numOutputs; j < weightsActive.size()-1; j++){
-            float activationI = (EnergyFlowReal[i]*EnergyFlowCounter[i]);
-            float activationJ = (EnergyFlowReal[j]*EnergyFlowCounter[j]);
+    for(int i = 0; i < weightsActive.size(); i++){
+        //error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
+        float actI = (EnergyFlowReal[i]);
+
+        error[i] *= 0.99;
+        for(int j = 0; j < weightsActive.size(); j++){
+            float actI = (EnergyFlowReal[i]);
+            float actJ = (EnergyFlowReal[j]);
+            error[i] += (0.5*((actI*actJ)+(1.0-actI)*(1.0-actJ))-(0.5*((1.0-actJ)*actI+actJ*(1.0-actI))));
+            relativeBehaviour[i][j] *= (1.0-actJ);
+            relativeBehaviour[i][j] += 0.5*((actI*actJ)+(1.0-actI)*(1.0-actJ))-0.5*((1.0-actJ)*actI+actJ*(1.0-actI));
 
             //energyBillance[i] += ((activationJ*(weightsActive[i][(j]))-(activationI*(weightsActive[j][i])))*activationJ*activationI;
-            activationDifference[i] += (activationI-activationJ)*(activationI)*(activationJ);
+            //activationDifference[i] += actJ*actI*((1.0*rand()/RAND_MAX)*((actI-actJ))-(1.0*rand()/RAND_MAX)*(actJ-actI));
             //activationDifference[i] += abs(activationI+activationJ)*activationJ*activationI;
             //activationDifference[j] -= (activationI-activationJ)*(activationI)*(activationJ);
         }
+
+        //error[i] /= weightsActive.size();
     }
 
+    float meanActivation = 0.0;
+    for(int i = 0; i < weightsActive.size(); i++){
+        float meanOutput = 0.0;
+        float meanInput = 0.0;
+        for(int j = 0; j < weightsActive.size(); j++){
+            float activationI = (EnergyFlowReal[i]);
+            float activationJ = (EnergyFlowReal[j]);
+
+            meanOutput += activationI*(weightsActive[j][i]);
+            meanInput +=  activationJ*(weightsActive[i][j]);
+
+        }
+        meanOutput /= weightsActive.size();
+        meanInput /= weightsActive.size();
+
+        for(int j = 0; j < weightsActive.size(); j++){
+            float activationI = (EnergyFlowReal[i]);
+            float activationJ = (EnergyFlowReal[j]);
+            weightsActive[j][i] = (weightsActive[j][i]-activationJ*meanOutput);
+            weightsActive[i][j] = (weightsActive[i][j]-activationI*meanInput);
+        }
+
+        meanActivation += (meanOutput+meanInput)/2.0;
+    }
+
+    //cout << error[14] << "\n";
 
 
-    for(int i = numInputs+numOutputs; i < weightsActive.size()-1; i++){
-        for(int j = numInputs+numOutputs; j < weightsActive.size()-1; j++){
-            float activationI = (EnergyFlowReal[i]*EnergyFlowCounter[i]);
-            float activationJ = (EnergyFlowReal[j]*EnergyFlowCounter[j]);
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            float activationI = (EnergyFlowReal[i]);
+            float activationJ = (EnergyFlowReal[j]);
+            float wheightsSum = 0.0;
 
+            //weightsActive[i][j] += activationJ*signum(wheightsSum)*0.01;
+          weightsActive[i][j] += activationJ*relativeBehaviour[i][j]*0.01;
+          weightsActive[i][weightsActive.size()-1] -= activationJ*activationJ*relativeBehaviour[i][j]*0.01;
 
-            weightsActive[i][j] += activationJ*abs(activationI-0.5)*signum(activationDifference[j]*activationDifference[i])*0.01;
-            //weightsActive[j][i] -= activationI*activationJ*signum(activationDifference[j]*activationDifference[i])*0.1;
+      //weightsActive[i][j] -= activationJ*(1.0-abs(signum(error[i])))*0.001*(weightsActive[i][j]);
+            //weightsActive[i][j] += activationJ*(1.0-abs(signum(relativeBehaviour[i][j]*meanChanging[i])))*(1.0-2.0*rand()/RAND_MAX)*0.2;
+     //weightsActive[i][weightsActive.size()] -= activationJ*activationJ*signum(relativeBehaviour[i][j])*0.01;
+            //weightsActive[j][i] += activationJ*activationI*signum(relativeBehaviour[i][j])*0.01;
             //Include the bias in the right way
-            weightsActive[i][weightsActive.size()-1] -= activationJ*abs(activationI-0.5)*(signum(activationDifference[j]*activationDifference[i]))*(1.0-(1.0-activationJ*abs(activationI-0.5)))*0.01;
+            //weightsActive[i][weightsActive.size()-1] -= (signum(wheightsSum))*activationI*activationJ*(1.0-(1.0-activationJ*activationI))*0.01;
             //weightsActive[j][weightsActive.size()-1] += activationI*activationJ*signum(activationDifference[j]*activationDifference[i])*(1.0-(1.0-activationJ*activationI))*0.1;
         }
     }
 
+
+
+    float absWeights = 0.0;
+    for(int i = 0; i < weightsActive.size(); i++){
+        float absWeightsOut = 0.0;
+        float absWeightsIn = 0.0;
+        for(int j = 0; j < weightsActive.size(); j++){
+            absWeightsOut += abs(weightsActive[j][i]);
+            absWeightsIn += abs(weightsActive[i][j]);
+        }
+
+        absWeights += absWeightsIn;
+
+        for(int j = 0; j < weightsActive.size(); j++){
+            weightsActive[j][i] = (weightsActive[j][i])*weightsActive.size()/absWeightsOut;
+            weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()/absWeightsIn;
+            //if(i == j) weightsActive[i][j] = 0.0;
+        }
+
+
+    }
+/*
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size(); j++){
+            weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()*weightsActive.size()/absWeights;
+        }
+    }
+*/
+
+
+
+    /*
+
+    for(int i = numInputs+numOutputs; i < weightsActive.size()-1; i++){
+        int j = numInputs+numOutputs+(rand()%(weightsActive.size()-1-(numInputs+numOutputs)));
+        int k = numInputs+numOutputs+(rand()%(weightsActive.size()-1-(numInputs+numOutputs)));
+
+        float activationI = (EnergyFlowReal[i]*EnergyFlowCounter[i]);
+        float activationJ = (EnergyFlowReal[j]*EnergyFlowCounter[j]);
+        float activationK = (EnergyFlowReal[k]*EnergyFlowCounter[k]);
+
+        weightsActive[i][j] -= ((-activationK*weightsActive[i][j]*weightsActive[k][i]+activationJ*weightsActive[i][j]))*activationJ*0.01;
+        weightsActive[k][i] -= ((-activationK*weightsActive[k][i]+activationI))*activationI*0.01;
+    }
+    */
 }
 
 void NeuralCluster::resetDeltaMatrix(){
@@ -515,9 +679,8 @@ float NeuralCluster::minMax(float x){
     return (1.0/(1.0+(exp(-x))));
 }
 
-void NeuralCluster::inputData(vector<float> input,vector<float> output,bool againstEmpty){
+void NeuralCluster::inputData(vector<float> input,vector<float> output){
 
-    if(!againstEmpty){
     for(int i = 0; i < input.size(); i++){
         fireCounter[i] = input[i];
         EnergyFlowCounter[i] = input[i];
@@ -532,27 +695,9 @@ void NeuralCluster::inputData(vector<float> input,vector<float> output,bool agai
         fireReal[i] = output[i-input.size()];
         ActivityReal[i] = output[i-input.size()];
     }
-    }
-
-    if(againstEmpty){
-        for(int i = 0; i < input.size(); i++){
-
-            fireReal[i] = input[i];
-            EnergyFlowReal[i] = input[i];
-            ActivityReal[i] = input[i];
-
-        }
-        for(int i = numInputs; i < output.size()+numInputs; i++) {
-            EnergyFlowReal[i] = output[i-numInputs];
-            fireReal[i] = output[i-numInputs];
-            ActivityReal[i] = output[i-numInputs];
-        }
-
-
-    }
 }
 
-void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sleep, bool hiddenWrite,bool againstEmpty){
+void NeuralCluster::propergate(vector<float> input,vector<float> output, float energy){
 
     beforelastCounter = lastCounter;
     beforelastReal = lastReal;
@@ -603,7 +748,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
     }
 
 
-    inputData(input,output,againstEmpty);
+    inputData(input,output);
 
     vector<float> deltaEnergysReal;
     vector<float> deltaEnergysCounter;
@@ -615,13 +760,13 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
 
     for(int i = 0; i < weightsActive.size()-1; i++){
         for(int j = 0; j < weightsActive.size(); j++){
-            absEnergyCounter += abs(weightsActive[i][j]*fireCounter[j]);
+            absEnergyCounter += abs((weightsActive[i][j]+deltaMatrix[i][j])*fireCounter[j]);
         }
     }
 
     for(int i = 0; i < weightsActive.size()-1; i++){
         for(int j = 0; j < weightsActive.size(); j++){
-            absEnergyReal += abs(weightsActive[i][j]*fireReal[j]);
+            absEnergyReal += abs((weightsActive[i][j]+deltaMatrix[i][j])*fireReal[j]);
         }
     }
 
@@ -644,6 +789,8 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             float OutputSignalReal = 0.0;
             float OutputSignalCounter = 0.0;
 
+            float errorSignal = 0.0;
+
 
             float weightsMean = 0.0;
 
@@ -651,18 +798,19 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
 
 
 
-                    InputSignalCounter +=  fireCounter[j]*(weightsActive[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireCounter[j]-fireCounter[i]));
-                    InputSignalReal += fireReal[j]*(weightsActive[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireReal[j]-fireReal[i]));
+                    InputSignalCounter +=  fireCounter[j]*(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireCounter[j]-fireCounter[i]));
+                    InputSignalReal += fireReal[j]*(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireReal[j]-fireReal[i]));
 
-                    OutputSignalCounter +=  fireCounter[i]*(weightsActive[j][i])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireCounter[j]-fireCounter[i]));
-                    OutputSignalReal += fireReal[i]*(weightsActive[j][i])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireReal[j]-fireReal[i]));
+                    OutputSignalCounter +=  fireCounter[i]*(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireCounter[j]-fireCounter[i]));
+                    OutputSignalReal += fireReal[i]*(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireReal[j]-fireReal[i]));
 
-                    EnergyInputCounter +=  fireCounter[j]*abs(weightsActive[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireCounter[j]-fireCounter[i]));
-                    EnergyInputReal += fireReal[j]*abs(weightsActive[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireReal[j]-fireReal[i]));
+                    EnergyInputCounter +=  fireCounter[j]*abs(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireCounter[j]-fireCounter[i]));
+                    EnergyInputReal += fireReal[j]*abs(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireReal[j]-fireReal[i]));
 
-                    EnergyOutputReal +=  (fireReal[i])*abs(weightsActive[j][i])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();//*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();
-                    EnergyOutputCounter += (fireCounter[i])*abs(weightsActive[j][i])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();//*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();
+                    EnergyOutputReal +=  (fireReal[i])*abs(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size()*energy;//*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size();
+                    EnergyOutputCounter += (fireCounter[i])*abs(weightsActive[i][j]+deltaMatrix[i][j])*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();
 
+                    errorSignal += error[j]*weightsActive[i][j];
                     /*
                     if(fireCounter[j] == 1.0) EnergyCounter +=  (weightsActive[i][j])*(lastCounter[j]);
                     else EnergyCounter +=  (weightsInactive[i][j])*(lastCounter[j]);
@@ -715,6 +863,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             samplerCounterOutputSignal[i] = OutputSignalCounter;
             samplerRealOutputSignal[i] = OutputSignalReal;
 
+            //error[i] += signum(errorSignal);
 
             //cout << "\n";
 
@@ -737,29 +886,34 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, bool sl
             //slowness[i] = 1.0*rand()/RAND_MAX;
         }
 
-        for(int i = numInputs+numOutputs; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
+        for(int i = 0; i < weightsActive.size()-1; i++){
             //samplerReal[i] = minMax(integratorReal[i]-OutputIntegratorReal[i]);//+samples*samplerReal[i])/(samples+1.0);
             //OutputSamplerReal[i] = (minMax(OutputIntegratorReal[i])+samples*OutputSamplerReal[i])/(samples+1.0);
 
-            EnergyFlowReal[i] =  minMax(samplerRealInputSignal[i]);
             samplerRealEnergyBillance[i] = samplerRealInput[i]-samplerRealOutput[i];
+            EnergyFlowReal[i] =  minMax(samplerRealInputSignal[i]);
+
+            mean[i] = (42.0*mean[i]+samplerRealInputSignal[i])/(43.0);
+            meanChanging[i] = (42.0*meanChanging[i]+abs(EnergyFlowReal[i]-lastReal[i]))/(43.0);
+
+
 
             //ActivityReal[i] = (fireReal[i]+samples*ActivityReal[i])/(samples+1.0);
             //EnergyFlowReal[i] = 0.5*(weightsActive.size())*samplerReal[i]/energyAbs;
 
         }
 
-        for(int i = numInputs; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
+        for(int i = numInputs; i < weightsActive.size()-1; i++){
             //samplerCounter[i] = minMax(integratorCounter[i]-OutputIntegratorCounter[i]);//+samples*samplerCounter[i])/(samples+1.0);
             //OutputSamplerCounter[i] = (minMax(OutputIntegratorCounter[i])+samples*OutputSamplerCounter[i])/(samples+1.0);
 
             //ActivityCounter[i] = (fireCounter[i]+samples*ActivityCounter[i])/(samples+1.0);
             //EnergyFlowCounter[i] = 0.5*(weightsActive.size())*samplerCounter[i]/energyAbs;
-            EnergyFlowCounter[i] =  minMax(samplerCounterInputSignal[i]);
             samplerCounterEnergyBillance[i] = samplerCounterInput[i]-samplerCounterOutput[i];
+            EnergyFlowCounter[i] =  minMax(samplerCounterInputSignal[i]);
         }
 
-        inputData(input,output,againstEmpty);
+        inputData(input,output);
 
         //if(hiddenWrite) for(int i = 0; i < input.size(); i++) samplerCounter[numInputs+numOutputs+numHiddens+i] = (samplerCounter[numInputs+numOutputs+numHiddens+i])*input[i];
         //if(hiddenWrite) for(int i = 0; i < input.size(); i++) samplerReal[numInputs+numOutputs+numHiddens+i] = (samplerReal[numInputs+numOutputs+numHiddens+i])*input[i];

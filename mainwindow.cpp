@@ -77,6 +77,7 @@ void MainWindow::processNet(){
 
 
         //frequency = 4;
+        float lastError = 0.0;
         vector<vector<float>> impulseResonses;
         for(int o = 0; o < 1; o++){
             //frequency = o+2;//(rand()+1)%(numOutputs-numLessons-1);
@@ -135,8 +136,8 @@ void MainWindow::processNet(){
 
                    for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
 
-                   for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
-                   targetV[k] = 1.0;
+                   for(int i = 0; i < numOutputs; i++) targetV.push_back(0.01);
+                   targetV[k] = 0.99;
 
   /*
                    float max = 0.0;
@@ -151,23 +152,29 @@ void MainWindow::processNet(){
 
 
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 16; i++){
-                       Cluster0->propergate(inputV,emptyVO,false,false,false);
+                   for(int i = 0; i < 8; i++){
+                       Cluster0->propergate(inputV,emptyVO,1.0);
                    }
 
                    vector<float> out0 = Cluster0->getActivation();
                    impulseResonses.push_back(out0);
 
+                   float squaredError = 0.0;
+
                    for(int i = 0; i < numOutputs; i++){
                        sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
+                       squaredError += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
                        //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
                    }
 
+                   float learningRate = (sqrt(squaredError/numOutputs))-lastError;
+                    lastError = sqrt(squaredError/numOutputs);
+
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 16; i++){
-                       Cluster0->propergate(inputV,targetV,false,false,false);
-                       //Cluster0->applyLearning();
-                       Cluster0->train(0.01);
+                   for(int i = 0; i < 8; i++){
+                       Cluster0->propergate(inputV,targetV,(1.0-lastError));
+                       Cluster0->applyLearning();
+                       //Cluster0->train(learningRate*0.01,lastError);
                    }
                    //Cluster0->resetDeltaMatrix();
 

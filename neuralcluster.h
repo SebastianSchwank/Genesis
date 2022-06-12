@@ -19,10 +19,10 @@ class NeuralCluster
 {
 public:
     NeuralCluster(int inputs, int outputs, int hidden, int attention);
-    void inputData(vector<float> input,vector<float> output,bool inverted);
-    void propergate(vector<float> input, vector<float> output, bool sleep, bool hiddenWrite, bool againstEmpty);
+    void inputData(vector<float> input, vector<float> output);
+    void propergate(vector<float> input, vector<float> output, float energy);
     vector<vector<float>> getWeights();
-    void train(float learningRate);
+    void train(float learningRate, float sqError);
     void removeNonlin(float learningRate);
     void trainBP(vector<float> target,float learningRate,int iterations);
     vector<float> getTarget();
@@ -52,6 +52,9 @@ private:
     vector<float>         beforelastReal;
     vector<float>         polarityReal;
     vector<float>         longTermMean;
+
+    vector<float>         mean;
+    vector<float>         meanChanging;
 
     vector<float>         realActivity;
     vector<float>         counterActivity;
@@ -91,14 +94,16 @@ private:
     vector<float>         weightsNeurons;
     vector<vector<float>> momentum;
     vector<vector<int>>   firingMatrixCounter;
+    vector<vector<float>> relativeBehaviour;
 
     vector<float>         momentumVector;
     int                   numInputs,numOutputs,numHiddens,numRekurrent;
 
     vector<float>         derivedError;
-    vector<float>         error,lastError,beforeLasteError;
+    vector<float>         error,lastError,beforeLasteError,approxError;
+    vector<float>         outputError,inputError;
 
-    float                 samples;
+    float                 samples,lastErrorSave;
 
 };
 
