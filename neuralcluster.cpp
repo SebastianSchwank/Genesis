@@ -515,38 +515,8 @@ void NeuralCluster::train(float learningRate, float sqError){
 void NeuralCluster::applyLearning(){
 
 
-    vector<float> energyBillance;
-    vector<float> activationDifference;
-
-    for(int i = 0; i < weightsActive.size();i++){
-        energyBillance.push_back(0.0);
-        activationDifference.push_back(0.0);
-
-    }
-
-    for(int i = 0; i < weightsActive.size(); i++){
-        //error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
-        float actI = (EnergyFlowReal[i]);
-
-        error[i] *= 0.9;
-        for(int j = 0; j < weightsActive.size(); j++){
-            float actI = (EnergyFlowReal[i]);
-            float actJ = (EnergyFlowReal[j]);
-            error[i] += (((actI*actJ))-(0.5*((1.0-actJ)*actI+actJ*(1.0-actI))));
-            relativeBehaviour[i][j] *= (1.0-actJ);
-            relativeBehaviour[i][j] += 0.5*((actI*actJ)+(1.0-actI)*(1.0-actJ))-0.5*((1.0-actJ)*actI+actJ*(1.0-actI));
-
-            //energyBillance[i] += ((activationJ*(weightsActive[i][(j]))-(activationI*(weightsActive[j][i])))*activationJ*activationI;
-            //activationDifference[i] += actJ*actI*((1.0*rand()/RAND_MAX)*((actI-actJ))-(1.0*rand()/RAND_MAX)*(actJ-actI));
-            //activationDifference[i] += abs(activationI+activationJ)*activationJ*activationI;
-            //activationDifference[j] -= (activationI-activationJ)*(activationI)*(activationJ);
-        }
-
-        //error[i] /= weightsActive.size();
-    }
-
     float meanActivation = 0.0;
-    for(int i = 0; i < weightsActive.size(); i++){
+    for(int i = 0; i < weightsActive.size()-1; i++){
         float meanOutput = 0.0;
         float meanInput = 0.0;
         for(int j = 0; j < weightsActive.size(); j++){
@@ -563,37 +533,12 @@ void NeuralCluster::applyLearning(){
         for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
-            weightsActive[j][i] = (weightsActive[j][i]-activationJ*meanOutput);
-            weightsActive[i][j] = (weightsActive[i][j]-activationI*meanInput);
+            weightsActive[j][i] -= ((activationJ*meanOutput));
+            weightsActive[i][j] -= ((activationI*meanInput));
         }
 
-        meanActivation += (meanOutput+meanInput)/2.0;
     }
 
-    //cout << error[14] << "\n";
-
-
-    for(int i = 0; i < weightsActive.size(); i++){
-        for(int j = 0; j < weightsActive.size(); j++){
-            float activationI = (EnergyFlowReal[i]);
-            float activationJ = (EnergyFlowReal[j]);
-            float wheightsSum = 0.0;
-
-            //weightsActive[i][j] += activationJ*signum(wheightsSum)*0.01;
-          weightsActive[i][j] += activationJ*(1.0-activationI)*activationI*relativeBehaviour[i][j]*0.01;
-          //weightsActive[i][weightsActive.size()-1] -= activationJ*activationJ*(1.0-activationI)*activationI*(1.0-activationI)*activationI*relativeBehaviour[i][j]*0.01;
-
-      //weightsActive[i][j] -= activationJ*(1.0-abs(signum(error[i])))*0.001*(weightsActive[i][j]);
-            //weightsActive[i][j] += activationJ*(1.0-abs(signum(relativeBehaviour[i][j]*meanChanging[i])))*(1.0-2.0*rand()/RAND_MAX)*0.2;
-     //weightsActive[i][weightsActive.size()] -= activationJ*activationJ*signum(relativeBehaviour[i][j])*0.01;
-            //weightsActive[j][i] += activationJ*activationI*signum(relativeBehaviour[i][j])*0.01;
-            //Include the bias in the right way
-            //weightsActive[i][weightsActive.size()-1] -= (signum(wheightsSum))*activationI*activationJ*(1.0-(1.0-activationJ*activationI))*0.01;
-            //weightsActive[j][weightsActive.size()-1] += activationI*activationJ*signum(activationDifference[j]*activationDifference[i])*(1.0-(1.0-activationJ*activationI))*0.1;
-        }
-        weightsActive[i][weightsActive.size()-1] -= error[i]*0.01;
-
-    }
 
 
 
@@ -613,9 +558,11 @@ void NeuralCluster::applyLearning(){
             weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()/absWeightsIn;
             if(i == j) weightsActive[i][j] = 0.0;
         }
-
-
     }
+
+
+
+
 /*
     for(int i = 0; i < weightsActive.size(); i++){
         for(int j = 0; j < weightsActive.size(); j++){
