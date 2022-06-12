@@ -528,11 +528,11 @@ void NeuralCluster::applyLearning(){
         //error[i] = (EnergyFlowReal[i]-EnergyFlowCounter[i]);
         float actI = (EnergyFlowReal[i]);
 
-        error[i] *= 0.99;
+        error[i] *= 0.9;
         for(int j = 0; j < weightsActive.size(); j++){
             float actI = (EnergyFlowReal[i]);
             float actJ = (EnergyFlowReal[j]);
-            error[i] += (0.5*((actI*actJ)+(1.0-actI)*(1.0-actJ))-(0.5*((1.0-actJ)*actI+actJ*(1.0-actI))));
+            error[i] += (((actI*actJ))-(0.5*((1.0-actJ)*actI+actJ*(1.0-actI))));
             relativeBehaviour[i][j] *= (1.0-actJ);
             relativeBehaviour[i][j] += 0.5*((actI*actJ)+(1.0-actI)*(1.0-actJ))-0.5*((1.0-actJ)*actI+actJ*(1.0-actI));
 
