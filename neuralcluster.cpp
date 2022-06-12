@@ -580,8 +580,8 @@ void NeuralCluster::applyLearning(){
             float wheightsSum = 0.0;
 
             //weightsActive[i][j] += activationJ*signum(wheightsSum)*0.01;
-          weightsActive[i][j] += activationJ*relativeBehaviour[i][j]*0.01;
-          weightsActive[i][weightsActive.size()-1] -= activationJ*activationJ*relativeBehaviour[i][j]*0.01;
+          weightsActive[i][j] += activationJ*(1.0-activationI)*activationI*relativeBehaviour[i][j]*0.01;
+          //weightsActive[i][weightsActive.size()-1] -= activationJ*activationJ*(1.0-activationI)*activationI*(1.0-activationI)*activationI*relativeBehaviour[i][j]*0.01;
 
       //weightsActive[i][j] -= activationJ*(1.0-abs(signum(error[i])))*0.001*(weightsActive[i][j]);
             //weightsActive[i][j] += activationJ*(1.0-abs(signum(relativeBehaviour[i][j]*meanChanging[i])))*(1.0-2.0*rand()/RAND_MAX)*0.2;
@@ -591,6 +591,8 @@ void NeuralCluster::applyLearning(){
             //weightsActive[i][weightsActive.size()-1] -= (signum(wheightsSum))*activationI*activationJ*(1.0-(1.0-activationJ*activationI))*0.01;
             //weightsActive[j][weightsActive.size()-1] += activationI*activationJ*signum(activationDifference[j]*activationDifference[i])*(1.0-(1.0-activationJ*activationI))*0.1;
         }
+        weightsActive[i][weightsActive.size()-1] -= error[i]*0.01;
+
     }
 
 
@@ -609,7 +611,7 @@ void NeuralCluster::applyLearning(){
         for(int j = 0; j < weightsActive.size(); j++){
             weightsActive[j][i] = (weightsActive[j][i])*weightsActive.size()/absWeightsOut;
             weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()/absWeightsIn;
-            //if(i == j) weightsActive[i][j] = 0.0;
+            if(i == j) weightsActive[i][j] = 0.0;
         }
 
 
