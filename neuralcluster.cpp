@@ -536,8 +536,8 @@ void NeuralCluster::applyLearning(){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            meanOutput += activationI*(weightsActive[j][i]+weightsActive[i][j]);
-            meanInput +=  activationJ*(weightsActive[i][j]+weightsActive[j][i]);
+            meanOutput += activationI*(activationI*weightsActive[j][i]+activationI*weightsActive[i][j]);
+            meanInput +=  activationJ*(activationJ*weightsActive[i][j]+activationJ*weightsActive[j][i]);
 
         }
         meanOutput /= weightsActive.size();
