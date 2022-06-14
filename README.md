@@ -1,6 +1,6 @@
-#Bi-Neuronal Network
+#Error-Free-Neuronal Network
 
-- Every neuron calculate the error for itself
+- No Error-Signal required
 - The architecture is a multiple layered connected neural network with feedback connections
 - It works without backpropagation
 - It displays all layers in one matrix
