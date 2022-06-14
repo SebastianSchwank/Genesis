@@ -551,15 +551,15 @@ void NeuralCluster::applyLearning(){
             momentum[j][i] *= 0.99;(activationI)*(1.0-activationI);
             momentum[i][j] *= 0.99;(activationJ)*(1.0-activationJ);
 
-            momentum[j][i] += ((activationJ*meanOutput));
-            momentum[i][j] += ((activationI*meanInput));
+            momentum[j][i] += ((activationJ*(meanOutput)));
+            momentum[i][j] += ((activationI*(meanInput)));
 
 
-            weightsActive[j][i] -= activationJ*(meanOutput+momentum[j][i])*0.01;
-            weightsActive[i][j] -= activationI*(meanInput+momentum[i][j])*0.01;
+            weightsActive[j][i] -= activationJ*((meanOutput)+momentum[j][i])*0.01;
+            weightsActive[i][j] -= activationI*((meanInput)+momentum[i][j])*0.01;
         }
 
-        //weightsActive[i][weightsActive.size()-1] -= (meanInput)*0.01;
+        weightsActive[i][weightsActive.size()-1] -= (meanInput*EnergyFlowReal[i]+meanOutput)*0.01;
     }
 
 
