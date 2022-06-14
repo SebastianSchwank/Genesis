@@ -555,8 +555,8 @@ void NeuralCluster::applyLearning(){
             momentum[i][j] += ((activationI*meanInput));
 
 
-            weightsActive[j][i] -= activationJ*abs(0.5-activationI)*(meanOutput+momentum[j][i])*0.01;
-            weightsActive[i][j] -= activationI*abs(0.5-activationJ)*(meanInput+momentum[i][j])*0.01;
+            weightsActive[j][i] -= activationJ*(meanOutput+momentum[j][i])*0.01;
+            weightsActive[i][j] -= activationI*(meanInput+momentum[i][j])*0.01;
         }
 
         weightsActive[i][weightsActive.size()-1] -= (meanInput)*0.01;
