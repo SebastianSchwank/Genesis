@@ -516,15 +516,28 @@ void NeuralCluster::applyLearning(){
 
 
     float meanActivation = 0.0;
-    for(int i = 0; i < weightsActive.size()-1; i++){
+    vector<bool> alreadyDone;
+    for(int i = 0; i < weightsActive.size(); i++)alreadyDone.push_back(false);
+    for(int m = 0; m < weightsActive.size()-1; m++){
+
+        int i = -1;
+        bool done = false;
+        while(!done){
+                i = rand()%(weightsActive.size()-1);
+                if(alreadyDone[i] == false){
+                    alreadyDone[i] = true;
+                    done = true;
+                }
+        }
+
         float meanOutput = 0.0;
         float meanInput = 0.0;
         for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            meanOutput += activationI*(weightsActive[j][i]);
-            meanInput +=  activationJ*(weightsActive[i][j]);
+            meanOutput += activationI*(weightsActive[j][i]+weightsActive[i][j]);
+            meanInput +=  activationJ*(weightsActive[i][j]+weightsActive[j][i]);
 
         }
         meanOutput /= weightsActive.size();
@@ -540,10 +553,20 @@ void NeuralCluster::applyLearning(){
     }
 
 
-
-
     float absWeights = 0.0;
-    for(int i = 0; i < weightsActive.size(); i++){
+    for(int i = 0; i < weightsActive.size(); i++)alreadyDone[i] = (false);
+    for(int m = 0; m < weightsActive.size(); m++){
+
+        int i = -1;
+        bool done = false;
+        while(!done){
+                i = rand()%(weightsActive.size());
+                if(alreadyDone[i] == false){
+                    alreadyDone[i] = true;
+                    done = true;
+                }
+        }
+
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
         for(int j = 0; j < weightsActive.size(); j++){
@@ -563,13 +586,12 @@ void NeuralCluster::applyLearning(){
 
 
 
-/*
     for(int i = 0; i < weightsActive.size(); i++){
         for(int j = 0; j < weightsActive.size(); j++){
             weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()*weightsActive.size()/absWeights;
         }
     }
-*/
+
 
 
 

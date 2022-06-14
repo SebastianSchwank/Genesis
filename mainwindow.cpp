@@ -173,7 +173,7 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 8; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       Cluster0->applyLearning();
+                       for(int m = 0; m < 7; m++)Cluster0->applyLearning();
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
                    //Cluster0->resetDeltaMatrix();
