@@ -268,7 +268,7 @@ void MainWindow::processNet(){
 
         if(!imageScaled->isNull()) delete imageScaled;
         if(!imageRespScaled->isNull()) delete imageRespScaled;
-        imageScaled = new QImage(Cluster0->getActivation().size()*2,Cluster0->getActivation().size()*2,QImage::Format_RGB32);
+        imageScaled = new QImage(Cluster0->getActivation().size()*6,Cluster0->getActivation().size()*6,QImage::Format_RGB32);
         imageRespScaled = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1)*8,numLessons*numOutputs*4*4,QImage::Format_RGB32);
         QSize pixSize1 = imageScaled->size();
         QSize pixSize2 = imageRespScaled->size();
