@@ -117,8 +117,8 @@ void MainWindow::processNet(){
 
 */
 
-            phase += 0.07;
-            if(phase >= 1.0) phase = 0.0;
+            //phase += 0.07;
+            //if(phase >= 1.0) phase = 0.0;
 
            for(int k = 0; k < (numOutputs); k++){
             //Training pass
@@ -136,8 +136,8 @@ void MainWindow::processNet(){
 
                    for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
 
-                   for(int i = 0; i < numOutputs; i++) targetV.push_back(0.01);
-                   targetV[k] = 0.99;
+                   for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
+                   targetV[k] = 1.0;
 
   /*
                    float max = 0.0;
@@ -152,7 +152,7 @@ void MainWindow::processNet(){
 
 
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 8; i++){
+                   for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,emptyVO,1.0);
                    }
 
@@ -171,12 +171,22 @@ void MainWindow::processNet(){
                     lastError = sqrt(squaredError/numOutputs);
 
                    Cluster0->resetSampler(false);
-                   for(int i = 0; i < 8; i++){
+                   for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       for(int m = 0; m < 7; m++)Cluster0->applyLearning();
+                       for(int m = 0; m < 7; m++)Cluster0->applyLearning(0.01);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
                    //Cluster0->resetDeltaMatrix();
+
+
+                   Cluster0->resetSampler(false);
+                   vector<float> invInput;
+                   for(int i = 0; i < numInputs; i++) invInput.push_back(1.0-inputV[i]);
+                   for(int i = 0; i < 9; i++){
+                       Cluster0->propergate(invInput,targetV,(1.0-lastError));
+                       for(int m = 0; m < 7; m++)Cluster0->applyLearning(0.01);
+                       //Cluster0->train(learningRate*0.01,lastError);
+                   }
 
 
                    out0 = Cluster0->getTarget();
@@ -318,6 +328,7 @@ void MainWindow::processNet(){
            ui->graphicsView_3->show();
 
            iteration += 1;
+
 }
 
 void MainWindow::on_pushButton_clicked()

@@ -29,7 +29,7 @@ public:
     float signum(float x);
     float minMax(float x);
     void resetSampler(bool randomize);
-    void applyLearning();
+    void applyLearning(float learningRate);
     void resetDeltaMatrix();
 
     vector<float> getActivation();
