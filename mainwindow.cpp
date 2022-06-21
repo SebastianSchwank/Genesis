@@ -173,7 +173,7 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       for(int m = 0; m < 7; m++)Cluster0->applyLearning(0.01);
+                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.01);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
                    //Cluster0->resetDeltaMatrix();
@@ -184,7 +184,7 @@ void MainWindow::processNet(){
                    for(int i = 0; i < numInputs; i++) invInput.push_back(1.0-inputV[i]);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(invInput,targetV,(1.0-lastError));
-                       for(int m = 0; m < 7; m++)Cluster0->applyLearning(0.01);
+                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.01);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
 
