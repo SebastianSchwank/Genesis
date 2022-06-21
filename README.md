@@ -1,6 +1,6 @@
 #Bi-Neuronal Network
 
-- Every neuron calculate the error for itself
+- Error free, Derivative free learning
 - The architecture is a multiple layered connected neural network with feedback connections
 - It works without backpropagation
 - It displays all layers in one matrix
