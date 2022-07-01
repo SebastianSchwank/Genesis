@@ -512,14 +512,15 @@ void NeuralCluster::train(float learningRate, float sqError){
         lastErrorSave = sqError;
 
 }
+
 void NeuralCluster::applyLearning(float learningRate){
 
-
-    float meanActivation = 0.0;
+    //Correct each neuron random independently
     vector<bool> alreadyDone;
     for(int i = 0; i < weightsActive.size(); i++)alreadyDone.push_back(false);
     for(int m = 0; m < weightsActive.size()-1; m++){
 
+        //Select a random neuron which is not already corrected
         int i = -1;
         bool done = false;
         while(!done){
@@ -530,63 +531,35 @@ void NeuralCluster::applyLearning(float learningRate){
                 }
         }
 
+        //Calculate the negative value of the in and output signal
         float meanOutput = 0.0;
         float meanInput = 0.0;
-
-        float meanOutputJ = 0.0;
-        float meanInputJ = 0.0;
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            meanOutput += -lastReal[i]*(weightsActive[j][i]);
-            meanInput +=  -lastReal[j]*(weightsActive[i][j]);
-
-            meanOutputJ += lastReal[j]*(weightsActive[j][i]);
-            meanInputJ += lastReal[i]*(weightsActive[i][j]);
-
+            meanOutput += (activationI)*(weightsActive[j][i]);
+            meanInput +=  (activationJ)*(weightsActive[i][j]);
         }
-        //meanOutput /= weightsActive.size();
-        //meanInput /= weightsActive.size();
 
 
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        //Do the correction on the weights accourding to the current activation on it
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
-
-
-            momentum[j][i] *= 0.99;(activationI)*(1.0-activationI);
-            momentum[i][j] *= 0.99;(activationJ)*(1.0-activationJ);
-
-            momentum[j][i] += (( activationJ*(activationI-0.5)*(0.5-activationI)*(((meanOutput*meanInputJ)))/(weightsActive.size())))*learningRate;
-            momentum[i][j] += ((activationI*(activationJ-0.5)*(0.5-activationJ)*(((meanInput*meanOutputJ)))/(weightsActive.size())))*learningRate;
-
-            weightsActive[j][i] += (activationJ)*(((meanOutput))/(weightsActive.size())+0.0*momentum[j][i])*learningRate;
-            weightsActive[i][j] += (activationI)*(((meanInput))/(weightsActive.size())+0.0*momentum[i][j])*learningRate;
-
-            //weightsActive[j][i] -= ((samplerRealEnergyBillance[j])*weightsActive[j][i]*activationI/(weightsActive.size())+0.0*momentum[j][i])*learningRate;
-          //weightsActive[i][j] -= (activationI*weightsActive[i][j]*(samplerRealEnergyBillance[i])*(meanInput)/(weightsActive.size()*weightsActive.size())+0.0*momentum[i][j])*learningRate;
-            //weightsActive[j][i] += (activationI*activationJ*(samplerRealEnergyBillance[i]+samplerRealEnergyBillance[j])*(meanOutput)*weightsActive[j][i]/(weightsActive.size()*weightsActive.size())+0.0*momentum[i][j])*learningRate;
-
-            //weightsActive[i][j] += activationI*(((meanOutput)/(weightsActive.size()))+momentum[j][i])*0.01;
-            //weightsActive[j][i] += activationJ*(((meanInput)/(weightsActive.size()))+momentum[i][j])*0.01;
-
-            //weightsActive[j][i] += (1.0-activationI)*(2.0*rand()/RAND_MAX-1.0)*0.01;
-            //weightsActive[i][j] += (1.0-activationJ)*(2.0*rand()/RAND_MAX-1.0)*0.01;
+            weightsActive[j][i] -= (lastReal[j])*(((meanOutput))/(weightsActive.size()))*learningRate;
+            weightsActive[i][j] -= (lastReal[i])*(((meanInput))/(weightsActive.size()))*learningRate;
         }
 
         float activationI = (EnergyFlowReal[i]);
-        weightsActive[i][weightsActive.size()-1] += activationI*(((meanInput))/(weightsActive.size()))*0.01;
+        weightsActive[i][weightsActive.size()-1] -= activationI*(((meanInput))/(weightsActive.size()))*0.01;
     }
 
-
-    float absWeights = 0.0;
-    vector<float> activationDifference;
-    for(int i = 0; i < weightsActive.size(); i++){
-        activationDifference.push_back(0.0); alreadyDone[i] = (false);
-    }
+    //Normalize the inputs and outputs of each neuron independently by random
+    for(int i = 0; i < weightsActive.size(); i++)alreadyDone[i] = (false);
     for(int m = 0; m < weightsActive.size(); m++){
 
+        //Select a random neuron which is not already corrected
         int i = -1;
         bool done = false;
         while(!done){
@@ -597,6 +570,7 @@ void NeuralCluster::applyLearning(float learningRate){
                 }
         }
 
+        //Calculate it's absolute weights at input and output
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
         for(int j = 0; j < weightsActive.size(); j++){
@@ -606,96 +580,16 @@ void NeuralCluster::applyLearning(float learningRate){
             absWeightsIn += abs(weightsActive[i][j]);
         }
 
-        //absWeights += absWeightsIn;
 
-        for(int j = 0; j < weightsActive.size()-1; j++){
-            float activationI = (EnergyFlowReal[i]);
-            float activationJ = (EnergyFlowReal[j]);
-            //weightsActive[j][i] -= (1.0-abs(activationI-activationJ))*0.001*(weightsActive[i][j]);
-            //weightsActive[i][j] += activationJ*(1.0-abs(activationJ-activationI))*0.001*(weightsActive[j][i]);
-            //if(i == j) weightsActive[i][j] = 0.0;
-        }
-
-        for(int j = 0; j < weightsActive.size(); j++){
-            //absWeightsOut += (weightsActive[j][i]);
-            //absWeightsIn += (weightsActive[i][j]);
-        }
-
-
-
-
+        //Normalize the inputs and outputs of each neuron so their absoulte sum is one
         for(int j = 0; j < weightsActive.size(); j++){
             weightsActive[j][i] = ((weightsActive[j][i])/absWeightsOut)*weightsActive.size();
             weightsActive[i][j] = ((weightsActive[i][j])/absWeightsIn)*weightsActive.size();
-            //if(i == j) weightsActive[i][j] = 0.0;
-            //if((i >= 0)&&(j >= 0) && (i < numInputs) && (j < numInputs)){ weightsActive[i][j] = 0.0; weightsInactive[i][j] = 0.0;skip = true;}
 
-            //if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; biasesActive[i][j] = 0.0;}
+            //Switch of some weights which are not nescessary
             if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < weightsActive.size())){ weightsActive[i][j] = 0.0; }
-
-            //if((i > numInputs+numOutputs)&& (j > numInputs+numOutputs) && (j <= numInputs+numOutputs+numHiddens) && (i <= numInputs+numOutputs+numHiddens)){ weightsActive[i][j] = 0.0;}
-            //if(i == j){ weightsActive[i][j] = 0.0;biasesActive[i][j] = 0.0;}
-
-            //if((i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (j < numInputs+numOutputs+numHiddens) && (i < numInputs+numOutputs+numHiddens)){ weights[i][j] = 0.0; skip = true;}
-
-            //if((i >= numInputs+numOutputs+numHiddens)&& (j >= numInputs+numOutputs+numHiddens) && (j <= numInputs+numOutputs+numHiddens+numRekurrent-1) && (i <= numInputs+numOutputs+numHiddens+numRekurrent)){ weights[i][j] = 0.0; skip = true;}
-
-            //if((i >= numInputs+numOutputs+numHiddens+numRekurrent)&& (j >= numInputs+numOutputs+numHiddens+numRekurrent) && (j <= numInputs+numOutputs+numHiddens+numRekurrent*2-1) && (i <= numInputs+numOutputs+numHiddens+numRekurrent*2)){ weights[i][j] = 0.0; skip = true;}
-
-            //if((i > numInputs+numOutputs+numHiddens/2)&& (j > numInputs+numOutputs+numHiddens/2) && (j <= numInputs+numOutputs+numHiddens-1) && (i <= numInputs+numOutputs+numHiddens)){ weights[i][j] = 0.0; skip = true;}
-            //if((i > numInputs+numOutputs+numHiddens)&& (j > numInputs+numOutputs+numHiddens) && (j <= numInputs+numOutputs+numHiddens+numRekurrent-1) && (i <= numInputs+numOutputs+numHiddens+numRekurrent)){ weights[i][j] = 0.0; skip = true;}
-
-            float activationI = (EnergyFlowReal[i]);
-            float activationJ = (EnergyFlowReal[j]);
-            activationDifference[i] += (activationI-activationJ);
         }
     }
-
-
-
-    float offset = 0.0;
-    for(int i = 0; i < weightsActive.size(); i++){
-        for(int j = 0; j < weightsActive.size(); j++){
-            //weightsActive[i][j] = (weightsActive[i][j])*weightsActive.size()*weightsActive.size()/absWeights;
-            //offset += weightsActive[i][j];
-
-        }
-    }
-
-    for(int i = 0; i < weightsActive.size()-1; i++){
-        for(int j = 0; j < weightsActive.size()-1; j++){
-            float activationI = (EnergyFlowReal[i]);
-            float activationJ = (EnergyFlowReal[j]);
-            int num = weightsActive.size();
-            float diff = 0.0;
-            for(int k = -1; k < 2;k++){
-                for(int l = -1; l < 2; l++){
-                    float activationK = (EnergyFlowReal[abs((i+k)%num)]);
-                    float activationL = (EnergyFlowReal[abs((j+l)%num)]);
-                    //if(k != 0 && l != 0) diff += activationK*(1.0-abs((activationJ*weightsActive[i][j])-(activationL*weightsActive[abs((i+k)%num)][abs((j+l)%num)])));
-                }
-            }
-            //weightsActive[i][j] += activationJ*(1.0-2.0*rand()/RAND_MAX)*diff*0.01;
-        }
-    }
-
-
-
-
-    /*
-
-    for(int i = numInputs+numOutputs; i < weightsActive.size()-1; i++){
-        int j = numInputs+numOutputs+(rand()%(weightsActive.size()-1-(numInputs+numOutputs)));
-        int k = numInputs+numOutputs+(rand()%(weightsActive.size()-1-(numInputs+numOutputs)));
-
-        float activationI = (EnergyFlowReal[i]*EnergyFlowCounter[i]);
-        float activationJ = (EnergyFlowReal[j]*EnergyFlowCounter[j]);
-        float activationK = (EnergyFlowReal[k]*EnergyFlowCounter[k]);
-
-        weightsActive[i][j] -= ((-activationK*weightsActive[i][j]*weightsActive[k][i]+activationJ*weightsActive[i][j]))*activationJ*0.01;
-        weightsActive[k][i] -= ((-activationK*weightsActive[k][i]+activationI))*activationI*0.01;
-    }
-    */
 }
 
 void NeuralCluster::resetDeltaMatrix(){
