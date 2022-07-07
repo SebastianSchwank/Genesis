@@ -41,6 +41,8 @@ Screenshot of the weights matrix of the three layered network which learns to de
 If you want to give feedback to the calculus or the algorythm, don't hesitate to write an e-mail:
 sebastian.schwank@googlemail.com
 
+\sum \limits_{n=0}^{\infty}
+
 License:
 
 The permission is given only for ediucational.
