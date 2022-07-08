@@ -2,7 +2,6 @@
 
 - Error free, Derivative free learning
 - Neuron locale solution
-- Monte Carlo solution for weights calculation
 - The architecture is a multiple layered connected neural network with feedback connections
 - It works without backpropagation
 - It displays all layers in one matrix
@@ -11,10 +10,9 @@ Pro's:
 - No backpropergation essential
 - Multiple layers supported
 - Matrix view of multilayer networks
-- Good paralellisation thanks to self error calculating neurons (difference between two networks sharing the same wheights)
+- Good paralellisation thanks to self error calculating neurons 
 - Debug window for the activity of the neurons over all lessons included
 - Learning speed improvement VS. backpropagation in some cases
-- Value hardening for rekurrence on neuron level and stabilisizing oszillations
 
  In this demo the net learns to analyse the frequency for a given sine function (the count of the active neuron is the frequency).
 
