@@ -583,7 +583,7 @@ void NeuralCluster::applyLearning(float learningRate){
         //Calculate it's absolute weights at input and output
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
             absWeightsOut += abs(weightsActive[j][i]);
@@ -595,13 +595,13 @@ void NeuralCluster::applyLearning(float learningRate){
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
         for(int j = 0; j < weightsActive.size()-1; j++){
-            weightsActive[j][i] = ((weightsActive[j][i])/absWeightsOut)*weightsActive.size();
-            //weightsActive[i][j] = ((weightsActive[i][j])/absWeightsIn)*weightsActive.size();
+            weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*weightsActive.size();
+            weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*weightsActive.size();
 
             //Switch of some weights which are not nescessary
             if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < weightsActive.size())){ weightsActive[i][j] = 0.0; }
             if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
-            //if(i == j){ weightsActive[i][j] = 0.0; }
+            if(i == j){ weightsActive[i][j] = 0.0; }
         }
     }
     for(int i = 0; i < weightsActive.size(); i++){
