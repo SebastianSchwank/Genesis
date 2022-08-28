@@ -534,6 +534,8 @@ void NeuralCluster::applyLearning(float learningRate){
                 }
         }
 
+        i = m;
+
         //Calculate the negative value of the in and output signal
         float meanOutput = 0.0;
         float meanInput = 0.0;
@@ -546,22 +548,24 @@ void NeuralCluster::applyLearning(float learningRate){
         }
         input.push_back(meanInput/weightsActive.size());
         output.push_back(meanOutput/weightsActive.size());
+    }
 
+    for(int i = 0; i < weightsActive.size()-1; i++){
 
         //Do the correction on the weights accourding to the current activation on it
         for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            weightsActive[i][j] -= (activationI)*(((((meanInput/weightsActive.size())))))*learningRate;
-            weightsActive[j][i] -= (activationJ)*(((((meanOutput/weightsActive.size())))))*learningRate;
+            weightsActive[i][j] -= (activationI)*(((((input[i])))))*learningRate;
+            weightsActive[j][i] -= (activationJ)*(((((output[i])))))*learningRate;
 
             //weightsActive[i][j] -= activationI*activationJ*(activationJ*weightsActive[i][j]+activationI*weightsActive[j][i])*learningRate;
             //weightsActive[i][j] += activationI*activationJ*(2.0*rand()/RAND_MAX-1.0)*learningRate;
         }
 
         float activationI = (EnergyFlowReal[i]);
-        weightsActive[i][weightsActive.size()-1] -= activationI*(((meanInput))/(weightsActive.size()))*learningRate;
+        weightsActive[i][weightsActive.size()-1] -= activationI*(((input[i]))/(weightsActive.size()))*learningRate;
     }
 
     float sumAbsWeights = 0.0;
@@ -599,7 +603,7 @@ void NeuralCluster::applyLearning(float learningRate){
             //Switch of some weights which are not nescessary
             if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < weightsActive.size())){ weightsActive[i][j] = 0.0; }
             if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
-            //if(i == j){ weightsActive[i][j] = 0.0; }
+            if(i == j){ weightsActive[i][j] = 0.0; }
         }
     }
     for(int i = 0; i < weightsActive.size(); i++){
