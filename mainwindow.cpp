@@ -178,6 +178,9 @@ void MainWindow::processNet(){
                    }
                    //Cluster0->resetDeltaMatrix();
 
+                   out0 = Cluster0->getTarget();
+                   impulseResonses.push_back(out0);
+
 
                    Cluster0->resetSampler(false);
                    vector<float> invInput;
@@ -189,8 +192,6 @@ void MainWindow::processNet(){
                    }
 
 
-                   out0 = Cluster0->getTarget();
-                   impulseResonses.push_back(out0);
 
 /*
                    Cluster0->resetSampler();
