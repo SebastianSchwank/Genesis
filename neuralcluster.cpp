@@ -543,8 +543,8 @@ void NeuralCluster::applyLearning(float learningRate){
             meanOutput += (activationI)*(weightsActive[j][i]);
             meanInput +=  (activationJ)*(weightsActive[i][j]);
 
-            meanOutputInactive += (activationJ)*(weightsActive[j][i]);
-            meanInputInactive +=  (activationI)*(weightsActive[i][j]);
+            meanOutputInactive += (weightsActive[j][i]);
+            meanInputInactive +=  (weightsActive[i][j]);
         }
 
 
@@ -553,8 +553,8 @@ void NeuralCluster::applyLearning(float learningRate){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            weightsActive[i][j] += (activationI)*((((exp(-meanInput/weightsActive.size())))))*learningRate;
-            weightsActive[j][i] -= (activationJ)*((((exp(meanOutput/weightsActive.size())))))*learningRate;
+            weightsActive[i][j] -= (activationI)*((((((0.0+((activationI)*meanInput/weightsActive.size())))))))*learningRate;
+            weightsActive[j][i] -= (activationJ)*((((((0.0+((activationI)*meanOutputInactive/weightsActive.size())))))))*learningRate;
 
             //weightsActive[i][j] -= activationI*activationJ*(activationJ*weightsActive[i][j]+activationI*weightsActive[j][i])*learningRate;
             //weightsActive[i][j] += activationI*activationJ*(2.0*rand()/RAND_MAX-1.0)*learningRate;
@@ -583,7 +583,7 @@ void NeuralCluster::applyLearning(float learningRate){
         //Calculate it's absolute weights at input and output
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
             absWeightsOut += abs(weightsActive[j][i]);
@@ -594,7 +594,7 @@ void NeuralCluster::applyLearning(float learningRate){
 
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut+absWeightsIn))*weightsActive.size()*2.0;
             weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn+absWeightsOut))*weightsActive.size()*2.0;
 
