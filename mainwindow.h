@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 
 #include "neuralcluster.h"
+#include "neuralorder.h"
 
 namespace Ui {
 class MainWindow;
@@ -52,9 +53,10 @@ private:
     int currentFrequency = 0;
     float phase = 0;
     int numInputs = 16;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 6;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 32;
+    int numOutputs = 10;//sizeof (output[0])/sizeof (output[0][0]);
+    int numHiddens = 16;
     int numAttentions = 0;
+    NeuralOrder* Cluster3;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;
     QTimer *timer;
