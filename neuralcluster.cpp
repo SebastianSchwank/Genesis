@@ -540,7 +540,7 @@ void NeuralCluster::applyLearning(float learningRate){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            meanOutput += (activationI)*(weightsActive[j][i]);
+            meanOutput += (activationJ)*(weightsActive[j][i]);
             meanInput +=  (activationJ)*(weightsActive[i][j]);
 
             meanOutputInactive += (weightsActive[j][i]);
@@ -553,8 +553,21 @@ void NeuralCluster::applyLearning(float learningRate){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            weightsActive[i][j] -= (activationI)*((((((0.0+((activationI)*meanInput/weightsActive.size())))))))*learningRate;
-            weightsActive[j][i] -= (activationJ)*((((((0.0+((activationI)*meanOutputInactive/weightsActive.size())))))))*learningRate;
+            weightsActive[i][j] -= (activationI)*(((((log(1.0+exp((activationI*meanInput/weightsActive.size()+weightsActive[i][j]))))))))*learningRate;
+            weightsActive[j][i] += (activationJ)*(((((log(1.0+exp(-(activationI*meanOutputInactive/weightsActive.size()-weightsActive[j][i]))))))))*learningRate;
+
+            //weightsActive[i][j] -= activationJ*(1.0-activationJ)*abs(0.5-activationI)*weightsActive[i][j]*learningRate;
+            weightsActive[j][i] -= activationJ*(1.0-activationJ)*weightsActive[i][j]*learningRate;
+            //weightsActive[i][j] += abs(0.5-activationJ)*(activationI)*(1.0-activationI)*weightsActive[i][j]*learningRate;
+
+            //weightsActive[j][i] -= activationJ*(1.0-activationJ)*abs(0.5-activationI)*weightsActive[j][i]*learningRate;
+
+            //weightsActive[i][j] += (activationI)*(((((log(1.0+exp(-(activationI)*(meanOutput)/weightsActive.size())))))))*learningRate;
+            //weightsActive[j][i] -= (activationJ)*(((((log(1.0+exp((activationI)*meanInputInactive/weightsActive.size())))))))*learningRate;
+
+
+            //weightsActive[j][i] += (activationI)*((((((0.0+exp(-(activationI)*(meanInput)/weightsActive.size())))))))*learningRate;
+            //weightsActive[i][j] -= (activationJ)*((((((0.0+exp((activationI)*meanOutputInactive/weightsActive.size())))))))*learningRate;
 
             //weightsActive[i][j] -= activationI*activationJ*(activationJ*weightsActive[i][j]+activationI*weightsActive[j][i])*learningRate;
             //weightsActive[i][j] += activationI*activationJ*(2.0*rand()/RAND_MAX-1.0)*learningRate;
@@ -600,7 +613,7 @@ void NeuralCluster::applyLearning(float learningRate){
 
             //Switch of some weights which are not nescessary
             if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < weightsActive.size())){ weightsActive[i][j] = 0.0; }
-            if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
+            //if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
             //if(i == j){ weightsActive[i][j] = 0.0; }
         }
     }
