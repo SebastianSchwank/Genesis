@@ -30,7 +30,6 @@ NeuralOrder::NeuralOrder(int inputs, int hidden)
     beforeLastState = state_off;
 
     threshhold = integrator_init;
-
     integrator = integrator_init;
 }
 
@@ -51,13 +50,13 @@ vector<int> NeuralOrder::propergate(vector<int> input){
             for(int l = 0; l < (lastState.size()); l++){
                 if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
                 integrator[i] *= 0.99999;
-                score_on += 1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]/(1.0*num_samples_on[i]);
-                score_on += 1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]/(1.0*num_samples_off[i]); //+(1.0*orderMatrixOn[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*orderMatrixOn[i][k*2+(1+lastState[k])%2][l*2+(1+lastState[l])%2])*1.0/(1.0*num_samples_On[i]);
+                score_on += 1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]*abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(1+lastState[k])%2][l*2+(1+lastState[l])%2]);
+                //score_on -= 1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]](1.0*num_samples_off[i]); //+(1.0*orderMatrixOn[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*orderMatrixOn[i][k*2+(1+lastState[k])%2][l*2+(1+lastState[l])%2])*1.0/(1.0*num_samples_On[i]);
                 }
             }
         }
         integrator[i] += (score_on);
-        if( 1.0/(1.0+exp(-((integrator[i])/(0.001)))) > 1.0*rand()/RAND_MAX) state[i] = 1;
+        if( 1.0/(1.0+exp(-((integrator[i])/(1.0)))) > 1.0*rand()/RAND_MAX) state[i] = 1;
         else state[i] = 0;
     }
 
@@ -84,15 +83,26 @@ void NeuralOrder::train(){
     for(int i = 0; i < state.size(); i++){
         if(state[i] == 1) num_samples_on[i]++;
         else num_samples_off[i]++;
+
+        float matrixMin = INFINITY;
         for(int k = 0; k < (state.size()); k++){
             for(int l = 0; l < (state.size()); l++){
                 if(state[i] == 1 && k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
-                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] = (1.0*num_samples_on[i]*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]+1.0)/(1.0*num_samples_on[i]+1.0);
+                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] += (+1.0*num_samples_off[i]);///(1.0*num_samples_on[i]+1.0*num_samples_off[i]);
                 }
                 if(state[i] == 0 && k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l])){
-                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] = (1.0*num_samples_off[i]*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0)/(1.0*num_samples_off[i]+1.0);
-
+                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] -= (1.0*num_samples_on[i]);///(1.0*num_samples_on[i]+1.0*num_samples_off[i]);
                 }
+                //if(abs(interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] && k != l) < matrixMin) matrixMin = interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]];
+            }
+        }
+
+        if(state[i] != lastState[i] && state[i] == 1) num_samples_off[i] = 0;
+        if(state[i] != lastState[i] && state[i] == 0) num_samples_on[i] = 0;
+
+        for(int k = 0; k < (state.size()); k++){
+            for(int l = 0; l < (state.size()); l++){
+                //interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] -= (2.0*signbit(interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]])-1.0)*matrixMin/2.0;
             }
         }
     }
