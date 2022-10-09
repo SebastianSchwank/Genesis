@@ -121,11 +121,11 @@ void MainWindow::processNet(){
             //phase += 0.07;
             //if(phase >= 1.0) phase = 0.0;
 
-           for(int k = 0; k < (numOutputs); k++){
+           for(int f = 0; f < (numOutputs); f++){
             //Training pass
 
                //float phase = (1.0*rand()/RAND_MAX);
-               //int k = rand()%numOutputs;
+               int k = f;//rand()%numOutputs;
 
                //Create empty vector as output placeholder
                    vector<int> emptyV;
@@ -192,9 +192,15 @@ void MainWindow::processNet(){
                         Cluster3->propergate(emptyV);
                     }
 
+                    vector<float> out3;
 
                     out1 = Cluster3->propergate(inputB);
 
+                    for(int i = 0; i < out1.size(); i++){
+                        out3.push_back(((float)out1[i]));
+                    }
+
+                    impulseResonses.push_back(out3);
 
                     Cluster3->resetStates();
                     for(int i = 0; i < 8; i++){
@@ -204,24 +210,14 @@ void MainWindow::processNet(){
                     }
 
 
-                    for(int i = 0; i < out1.size(); i++){
-                        out0[i] = ((float)out1[i]);
-                    }
-
-                    impulseResonses.push_back(out0);
 
 
-
-                    float squaredError = 0.0;
 
                     for(int i = 0; i < numOutputs; i++){
                         sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
-                        squaredError += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
+                        sumErrorOver += (targetV[i]-out3[i+numInputs])*(targetV[i]-out3[i+numInputs]);
                         //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
                     }
-
-                    float learningRate = (sqrt(squaredError/numOutputs))-lastError;
-                     lastError = sqrt(squaredError/numOutputs);
 
 
 

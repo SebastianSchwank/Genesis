@@ -22,17 +22,18 @@ private:
     vector<int> lastState;
     vector<int> state;
 
-    vector<float> integrator;
-    vector<float> offSet;
+    vector<float> meanState;
+    vector<float> stateChangeActivity;
 
-    vector<vector<vector<int>>> interpretationMatrix;
+    vector<float> integrator;
+
+    vector<vector<vector<float>>> interpretationMatrix;
+
+    vector<vector<int>> displacementMatrix;
     vector<vector<int>> similarityMatrix;
 
-    vector<int> state_balance;
-    vector<int> num_samples_on;
-    vector<int> num_samples_off;
-    int numSamples;
-    int globalState;
+    vector<int> num_samples_on,last_num_samples_on;
+    vector<int> num_samples_off,last_num_samples_off;
 
 };
 
