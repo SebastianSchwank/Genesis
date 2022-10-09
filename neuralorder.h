@@ -25,10 +25,15 @@ private:
     vector<float> integrator;
     vector<float> threshhold;
 
-    vector<vector<vector<float>>> interpretationMatrix;
+    vector<vector<vector<int>>> interpretationMatrix;
+    vector<vector<int>> similarityMatrix;
 
+    vector<int> state_balance;
     vector<int> num_samples_on;
     vector<int> num_samples_off;
+    int numSamples;
+    int globalState;
+
 };
 
 #endif // NEURALORDER_H
