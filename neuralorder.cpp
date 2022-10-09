@@ -54,12 +54,13 @@ vector<int> NeuralOrder::propergate(vector<int> input){
         for(int k = 0; k < (lastState.size()); k++){
             for(int l = 0; l < (lastState.size()); l++){
                 if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
-                integrator[i] *= 0.9;
+
                 score_on += 1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]];}
             }
         }
+        integrator[i] *= 0.9;
         integrator[i] += (score_on);
-        if( 1.0/(1.0+exp(-((integrator[i])/(1000000.0)))) > 1.0*rand()/RAND_MAX) state[i] = 1;
+        if( 1.0/(1.0+exp(-((integrator[i])/(10000.0)))) > 1.0*rand()/RAND_MAX) state[i] = 1;
         else state[i] = 0;
     }
 
