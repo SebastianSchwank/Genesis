@@ -23,7 +23,7 @@ private:
     vector<int> state;
 
     vector<float> integrator;
-    vector<float> threshhold;
+    vector<float> offSet;
 
     vector<vector<vector<int>>> interpretationMatrix;
     vector<vector<int>> similarityMatrix;
