@@ -54,7 +54,12 @@ vector<int> NeuralOrder::propergate(vector<int> input){
             for(int l = 0; l < (lastState.size()); l++){
                 if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
 
-                score_on += (1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]])*abs((1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+1)%2]));}
+                score_on += (1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]])*
+                        (abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+1)%2])+
+                        abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+0)%2][l*2+(lastState[l]+1)%2])+
+                        abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+0)%2]));
+
+                }
             }
         }
         integrator[i] *= 0.9;
@@ -88,18 +93,28 @@ void NeuralOrder::train(){
 
     for(int i = 0; i < state.size(); i++){
         int absMin = INFINITY;
-        if(state[i] == 1){num_samples_on[i]++; }
-        else{ num_samples_off[i]++; }
+        if(state[i] == 1){state_balance[i]++; }
+        else{ state_balance[i]--; }
 
         for(int k = 0; k < (state.size()); k++){
             for(int l = 0; l < (state.size()); l++){
                 if(state[i] == 1 && k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
-                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] += num_samples_off[i];
+                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] += -state_balance[i]+numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+0)%2] -= -state_balance[i]+numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+0)%2][l*2+(lastState[l]+1)%2] -= -state_balance[i]+numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+1)%2] -= -state_balance[i]+numSamples;
+
                 }
                 if(state[i] == 0 && k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l])){
-                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] -= num_samples_on[i];
+                    interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]] += -state_balance[i]-numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+0)%2] -= -state_balance[i]-numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+0)%2][l*2+(lastState[l]+1)%2] -= -state_balance[i]-numSamples;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+1)%2] -= -state_balance[i]-numSamples;
                 }
             }
+
+            if(state[i] == 1 && lastState[i] != state[i]) num_samples_on[i] = 0;
+            if(state[i] == 0 && lastState[i] != state[i]) num_samples_off[i] = 0;
         }
 
 
