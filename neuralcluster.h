@@ -87,7 +87,7 @@ private:
 
     vector<float>         slowness;
 
-    vector<float>         slope;
+    vector<float>         gradient;
     vector<vector<float>> weightsActive;
     vector<vector<float>> biasesActive;
     vector<vector<float>> deltaMatrix;

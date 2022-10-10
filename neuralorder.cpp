@@ -32,6 +32,7 @@ NeuralOrder::NeuralOrder(int inputs, int hidden)
     integrator = integrator_init;
     stateChangeActivity = integrator_init;
     meanState = integrator_init;
+    gradient = integrator_init;
 }
 
 vector<int> NeuralOrder::propergate(vector<int> input){
@@ -40,7 +41,7 @@ vector<int> NeuralOrder::propergate(vector<int> input){
         state[i] = 1.0-input[i];
     }
 
-    //state[state.size()-1] = 1-state[state.size()-1];
+    state[state.size()-1] = 1-state[state.size()-1];
 
     beforeLastState = lastState;
     lastState = state;
@@ -51,10 +52,10 @@ vector<int> NeuralOrder::propergate(vector<int> input){
         for(int k = 0; k < (lastState.size()); k++){
             for(int l = 0; l < (lastState.size()); l++){
                 if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ){
-                score_on += (1.0-stateChangeActivity[i])*(1.0*interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2])*
+                score_on += (1.0-stateChangeActivity[i])*(1.0*interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2]);/*
                         (abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+1)%2])+
                         abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+0)%2][l*2+(lastState[l]+1)%2])+
-                        abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+0)%2]));
+                        abs(1.0*interpretationMatrix[i][k*2+lastState[k]][l*2+lastState[l]]-1.0*interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l]+0)%2]));*/
                 }
             }
         }
@@ -67,6 +68,8 @@ vector<int> NeuralOrder::propergate(vector<int> input){
         stateChangeActivity[i] += abs(state[i]-lastState[i]);
 
         meanState[i] = (meanState[i]*999.0+state[i])/1000.0;
+
+        gradient[i] = 10.0/(1.0+exp(-((integrator[i])*(0.000000001))))*(1.0-1.0/(1.0+exp(-((integrator[i])*(0.000000001)))));
     }
 
 
@@ -96,13 +99,40 @@ void NeuralOrder::train(){
 
     for(int i = 0; i < state.size(); i++){
 
+        float meanMatrix = 0.0;
         for(int k = 0; k < (state.size()); k++){
             for(int l = 0; l < (state.size()); l++){
-                if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ) interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2] += (state[i]*meanState[i]-(1.0-state[i])*(1.0-meanState[i]))*stateChangeActivity[l]*stateChangeActivity[k];
-            }
+                    if(k != l && (lastState[k] != beforeLastState[k] || lastState[l] != beforeLastState[l]) ) interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2] += ((meanState[i]-state[i])+state[i]*meanState[i]+(1.0-state[i])*(meanState[i]-1.0))*stateChangeActivity[l]*stateChangeActivity[k]*gradient[i];
 
+                if( (k < state.size()-1) && (l < state.size()-1)){
+                    meanMatrix += interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2];
+                    meanMatrix += interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l])%2];
+                    meanMatrix += interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l]+1)%2];
+                    meanMatrix += interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l+1])%2];
+                }
+        }
         }
 
+    meanMatrix /= (state.size()*state.size())*4;
+
+        for(int k = 0; k < (state.size()); k++){
+            for(int l = 0; l < (state.size()); l++){
+
+
+                if( (k < state.size()-1) && (l < state.size()-1)){
+                    interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2] -= meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l])%2]-= meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l]+1)%2]-= meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l+1])%2]-= meanMatrix;
+                }else{
+                    interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l])%2] += meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l])%2]+= meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k])%2][l*2+(lastState[l]+1)%2]+= meanMatrix;
+                    interpretationMatrix[i][k*2+(lastState[k]+1)%2][l*2+(lastState[l+1])%2]+= meanMatrix;
+                }
+
+                }
+            }
 
     }
 

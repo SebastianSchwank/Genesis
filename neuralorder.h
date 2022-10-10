@@ -26,6 +26,7 @@ private:
     vector<float> stateChangeActivity;
 
     vector<float> integrator;
+    vector<float> gradient;
 
     vector<vector<vector<float>>> interpretationMatrix;
 

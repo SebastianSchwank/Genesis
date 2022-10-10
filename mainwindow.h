@@ -6,9 +6,9 @@
 #include <QTimer>
 #include <QDebug>
 #include <QGraphicsScene>
+#include <QTime>
 
 #include "neuralcluster.h"
-#include "neuralorder.h"
 
 namespace Ui {
 class MainWindow;
@@ -53,10 +53,9 @@ private:
     int currentFrequency = 0;
     float phase = 0;
     int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 8;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 16;
+    int numOutputs = 6;//sizeof (output[0])/sizeof (output[0][0]);
+    int numHiddens = 32;
     int numAttentions = 0;
-    NeuralOrder* Cluster3;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;
     QTimer *timer;
