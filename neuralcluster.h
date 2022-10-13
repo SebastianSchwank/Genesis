@@ -86,8 +86,9 @@ private:
     vector<int>           period;
 
     vector<float>         slowness;
+    vector<vector<short>> mask;
 
-    vector<float>         gradient;
+    vector<float>         slope;
     vector<vector<float>> weightsActive;
     vector<vector<float>> biasesActive;
     vector<vector<float>> deltaMatrix;

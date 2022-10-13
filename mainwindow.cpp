@@ -120,11 +120,11 @@ void MainWindow::processNet(){
             //phase += 0.07;
             //if(phase >= 1.0) phase = 0.0;
 
-           for(int l = 0; l < (numOutputs); l++){
+           for(int k = 0; k < (numOutputs); k++){
             //Training pass
 
                //float phase = (1.0*rand()/RAND_MAX);
-               int k = rand()%numOutputs;
+               //int k = rand()%numOutputs;
 
                //Create empty vector as output placeholder
                    vector<float> emptyV;
@@ -173,10 +173,13 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.005);
+                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.05);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
                    //Cluster0->resetDeltaMatrix();
+
+                   out0 = Cluster0->getTarget();
+                   impulseResonses.push_back(out0);
 
 
                    Cluster0->resetSampler(false);
@@ -184,13 +187,11 @@ void MainWindow::processNet(){
                    for(int i = 0; i < numInputs; i++) invInput.push_back(1.0-inputV[i]);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(invInput,targetV,(1.0-lastError));
-                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.005);
+                       for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.05);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
 
 
-                   out0 = Cluster0->getTarget();
-                   impulseResonses.push_back(out0);
 
 /*
                    Cluster0->resetSampler();

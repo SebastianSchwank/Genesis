@@ -6,7 +6,6 @@
 #include <QTimer>
 #include <QDebug>
 #include <QGraphicsScene>
-#include <QTime>
 
 #include "neuralcluster.h"
 
@@ -52,7 +51,7 @@ private:
 
     int currentFrequency = 0;
     float phase = 0;
-    int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
+    int numInputs = 16;//sizeof (input[0])/sizeof (input[0][0]);
     int numOutputs = 6;//sizeof (output[0])/sizeof (output[0][0]);
     int numHiddens = 32;
     int numAttentions = 0;
