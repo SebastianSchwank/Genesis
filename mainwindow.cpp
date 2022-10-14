@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Initalize completly connected stacked neural net
     Cluster0 = new NeuralCluster(numInputs,numOutputs,numHiddens,numAttentions);
+    Cluster3 = new NeuralOrder(numInputs+numOutputs,numHiddens+numAttentions);
 
     image = new QImage(Cluster0->getActivation().size(),Cluster0->getActivation().size()*2,QImage::Format_RGB32);
     imageResp = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1),numLessons*numOutputs*4,QImage::Format_RGB32);
@@ -120,14 +121,14 @@ void MainWindow::processNet(){
             //phase += 0.07;
             //if(phase >= 1.0) phase = 0.0;
 
-           for(int k = 0; k < (numOutputs); k++){
+           for(int f = 0; f < (numOutputs); f++){
             //Training pass
 
                //float phase = (1.0*rand()/RAND_MAX);
-               //int k = rand()%numOutputs;
+               int k = f;//rand()%numOutputs;
 
                //Create empty vector as output placeholder
-                   vector<float> emptyV;
+                   vector<int> emptyV;
                    vector<float> emptyVO;
                //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
 
@@ -146,17 +147,93 @@ void MainWindow::processNet(){
                    for(int i = 0; i < numOutputs; i++) mean += (targetV[i]/max);
                    for(int i = 0; i < numOutputs; i++) targetV[i] = (targetV[i]/max)-(mean/(numOutputs));
 */
+                    vector<int> inputB;
+                    vector<int> inputBO;
+                    for(int i = 0; i < numInputs; i++){
+                        inputB.push_back((int)round(inputV[i]));
+                        inputBO.push_back((int)round(inputV[i]));
+                    }
+
+                    for(int i = 0; i < numOutputs; i++){
+                        inputBO.push_back((int)round(targetV[i]));
+                    }
+
+                    Cluster3->resetStates();
+                    for(int i = 0; i < 8; i++){
+                        Cluster3->propergate(inputB);
+                        Cluster3->propergate(emptyV);
+                    }
+                    vector<int> out1;
+                    out1 = Cluster3->propergate(inputB);
+                    vector<float> out0;
+
+                    Cluster3->resetStates();
+                    for(int i = 0; i < 8; i++){
+                        Cluster3->propergate(emptyV);
+                        Cluster3->propergate(inputBO);
+                        Cluster3->train();
+                    }
+
+                    for(int i = 0; i < out1.size(); i++){
+                        out0.push_back((float)out1[i]);
+                    }
+
+                    impulseResonses.push_back(out0);
+
+
+                    for(int i = 0; i < numInputs; i++){
+                        inputB[i] = 1-inputB[i];
+                        inputBO[i] = 1-inputBO[i];
+                    }
+
+                    Cluster3->resetStates();
+                    for(int i = 0; i < 8; i++){
+                        Cluster3->propergate(inputB);
+                        Cluster3->propergate(emptyV);
+                    }
+
+                    vector<float> out3;
+
+                    out1 = Cluster3->propergate(inputB);
+
+                    for(int i = 0; i < out1.size(); i++){
+                        out3.push_back(((float)out1[i]));
+                    }
+
+                    impulseResonses.push_back(out3);
+
+                    Cluster3->resetStates();
+                    for(int i = 0; i < 8; i++){
+                        Cluster3->propergate(emptyV);
+                        Cluster3->propergate(inputBO);
+                        Cluster3->train();
+                    }
+
+
+                    Cluster3->resetStates();
+                    for(int i = 0; i < 24; i++){
+                        //Cluster3->sleep();
+                    }
 
 
 
 
 
+                    for(int i = 0; i < numOutputs; i++){
+                        sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
+                        sumErrorOver += (targetV[i]-out3[i+numInputs])*(targetV[i]-out3[i+numInputs]);
+                        //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
+                    }
+
+
+
+                    /*
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,emptyVO,1.0);
                    }
 
-                   vector<float> out0 = Cluster0->getActivation();
+                   //vector<float> out0 = Cluster0->getActivation();
                    impulseResonses.push_back(out0);
 
                    float squaredError = 0.0;
@@ -190,7 +267,7 @@ void MainWindow::processNet(){
                        for(int m = 0; m < 5; m++)Cluster0->applyLearning(0.05);
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
-
+*/
 
 
 /*
@@ -251,7 +328,7 @@ void MainWindow::processNet(){
             }
         }
 
-
+/*
         float max = 0.0;
         for(int x = 0; x < Cluster0->getActivation().size(); x++){
             for(int y = 0; y < Cluster0->getActivation().size(); y++){
@@ -270,7 +347,7 @@ void MainWindow::processNet(){
                 image->setPixel(x,y,col.rgb());
             }
         }
-
+*/
         scene1->clear();
         scene2->clear();
 
@@ -315,16 +392,16 @@ void MainWindow::processNet(){
         ErrorView->addLine(iteration,-lastErrorBP*4,iteration+1,-currentErrorBP*4);
         ErrorView->addLine(iteration,-lastErrorMine*2,iteration+1,-CurrentErrorMine*2,coloredLine);
 
-           scene1->addPixmap(QPixmap::fromImage(*imageScaled));
+           //scene1->addPixmap(QPixmap::fromImage(*imageScaled));
            scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
 
            ui->graphicsView_2->setScene(scene2);
-           ui->graphicsView->setScene( scene1 );
+           //ui->graphicsView->setScene( scene1 );
 
 
            ui->graphicsView_3->setScene(ErrorView);
 
-           ui->graphicsView->show();
+           //ui->graphicsView->show();
            ui->graphicsView_2->show();
            ui->graphicsView_3->show();
 

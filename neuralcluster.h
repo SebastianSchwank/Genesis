@@ -86,7 +86,6 @@ private:
     vector<int>           period;
 
     vector<float>         slowness;
-    vector<vector<short>> mask;
 
     vector<float>         slope;
     vector<vector<float>> weightsActive;

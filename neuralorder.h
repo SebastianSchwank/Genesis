@@ -15,6 +15,7 @@ public:
 
     vector<int> propergate(vector<int> inputs);
     void train();
+    void sleep();
     void resetStates();
 
 private:
@@ -26,7 +27,6 @@ private:
     vector<float> stateChangeActivity;
 
     vector<float> integrator;
-    vector<float> gradient;
 
     vector<vector<vector<float>>> interpretationMatrix;
 
