@@ -13,7 +13,7 @@ class NeuralOrder
 public:
     NeuralOrder(int inputs, int hidden);
 
-    vector<int> propergate(vector<int> inputs);
+    vector<float> propergate(vector<int> inputs);
     void train();
     void sleep();
     void resetStates();
@@ -25,6 +25,7 @@ private:
 
     vector<float> meanState;
     vector<float> stateChangeActivity;
+    vector<float> Activity;
 
     vector<float> integrator;
 

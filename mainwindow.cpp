@@ -163,7 +163,7 @@ void MainWindow::processNet(){
                         Cluster3->propergate(inputB);
                         Cluster3->propergate(emptyV);
                     }
-                    vector<int> out1;
+                    vector<float> out1;
                     out1 = Cluster3->propergate(inputB);
                     vector<float> out0;
 
@@ -208,11 +208,11 @@ void MainWindow::processNet(){
                         Cluster3->propergate(inputBO);
                         Cluster3->train();
                     }
-*/
 
+*/
                     Cluster3->resetStates();
                     for(int i = 0; i < 24; i++){
-                        Cluster3->sleep();
+                        //Cluster3->sleep();
                     }
 
 
