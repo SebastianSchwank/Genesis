@@ -180,7 +180,7 @@ void MainWindow::processNet(){
 
                     impulseResonses.push_back(out0);
 
-
+/*
                     for(int i = 0; i < numInputs; i++){
                         inputB[i] = 1-inputB[i];
                         inputBO[i] = 1-inputBO[i];
@@ -208,11 +208,11 @@ void MainWindow::processNet(){
                         Cluster3->propergate(inputBO);
                         Cluster3->train();
                     }
-
+*/
 
                     Cluster3->resetStates();
                     for(int i = 0; i < 24; i++){
-                        //Cluster3->sleep();
+                        Cluster3->sleep();
                     }
 
 
@@ -221,7 +221,7 @@ void MainWindow::processNet(){
 
                     for(int i = 0; i < numOutputs; i++){
                         sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
-                        sumErrorOver += (targetV[i]-out3[i+numInputs])*(targetV[i]-out3[i+numInputs]);
+                        //sumErrorOver += (targetV[i]-out3[i+numInputs])*(targetV[i]-out3[i+numInputs]);
                         //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
                     }
 

@@ -28,7 +28,7 @@ private:
 
     vector<float> integrator;
 
-    vector<vector<vector<float>>> interpretationMatrix;
+    vector<vector<float>> interpretationMatrix;
 
     vector<vector<int>> displacementMatrix;
     vector<vector<int>> similarityMatrix;
