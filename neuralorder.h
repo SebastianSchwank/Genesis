@@ -17,6 +17,8 @@ public:
     void train();
     void sleep();
     void resetStates();
+    vector<vector<float>> getWeights();
+    vector<float> getActivation();
 
 private:
     vector<int> beforeLastState;

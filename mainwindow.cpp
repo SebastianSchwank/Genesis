@@ -161,7 +161,6 @@ void MainWindow::processNet(){
                     Cluster3->resetStates();
                     for(int i = 0; i < 8; i++){
                         Cluster3->propergate(inputB);
-                        Cluster3->propergate(emptyV);
                     }
                     vector<float> out1;
                     out1 = Cluster3->propergate(inputB);
@@ -169,7 +168,6 @@ void MainWindow::processNet(){
 
                     Cluster3->resetStates();
                     for(int i = 0; i < 8; i++){
-                        Cluster3->propergate(emptyV);
                         Cluster3->propergate(inputBO);
                         Cluster3->train();
                     }
@@ -179,8 +177,8 @@ void MainWindow::processNet(){
                     }
 
                     impulseResonses.push_back(out0);
-
 /*
+
                     for(int i = 0; i < numInputs; i++){
                         inputB[i] = 1-inputB[i];
                         inputBO[i] = 1-inputBO[i];
@@ -189,7 +187,6 @@ void MainWindow::processNet(){
                     Cluster3->resetStates();
                     for(int i = 0; i < 8; i++){
                         Cluster3->propergate(inputB);
-                        Cluster3->propergate(emptyV);
                     }
 
                     vector<float> out3;
@@ -204,12 +201,11 @@ void MainWindow::processNet(){
 
                     Cluster3->resetStates();
                     for(int i = 0; i < 8; i++){
-                        Cluster3->propergate(emptyV);
                         Cluster3->propergate(inputBO);
                         Cluster3->train();
                     }
-
 */
+
                     Cluster3->resetStates();
                     for(int i = 0; i < 24; i++){
                         //Cluster3->sleep();
@@ -315,7 +311,6 @@ void MainWindow::processNet(){
       }
         //Cluster0->resetDeltaMatrix();
 
-        if(iteration%1 == 0){
 
 
         for(int x = 0; x < impulseResonses.size(); x++){
@@ -328,26 +323,28 @@ void MainWindow::processNet(){
             }
         }
 
-/*
+
+        if(iteration%64 == 0){
+
         float max = 0.0;
-        for(int x = 0; x < Cluster0->getActivation().size(); x++){
-            for(int y = 0; y < Cluster0->getActivation().size(); y++){
-                if(abs(Cluster0->getWeights()[y][x]) > max) max = abs(Cluster0->getWeights()[y][x]);
+        for(int x = 0; x < Cluster3->getActivation().size(); x++){
+            for(int y = 0; y < Cluster3->getActivation().size(); y++){
+                if(abs(Cluster3->getWeights()[y][x]) > max) max = abs(Cluster3->getWeights()[y][x]);
             }
         }
 
 
-        for(int x = 0; x < Cluster0->getActivation().size(); x++){
-            for(int y = 0; y < Cluster0->getActivation().size(); y++){
+        for(int x = 0; x < Cluster3->getActivation().size(); x++){
+            for(int y = 0; y < Cluster3->getActivation().size(); y++){
                 QColor col = QColor(128,128,128);
 
-                if(Cluster0->getWeights()[y][x] > 0.0) col = QColor(255.0*(2.0/(1.0+(exp(-Cluster0->getWeights()[y][x])))-1.0),0,0);
-                if(Cluster0->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*(2.0/(1.0+(exp(-Cluster0->getWeights()[y][x])))-1.0));
+                if(Cluster3->getWeights()[y][x] > 0.0) col = QColor(255.0*(2.0/(1.0+(exp(-Cluster3->getWeights()[y][x])))-1.0),0,0);
+                if(Cluster3->getWeights()[y][x] < 0.0) col = QColor(0,0,-255.0*(2.0/(1.0+(exp(-Cluster3->getWeights()[y][x])))-1.0));
 
                 image->setPixel(x,y,col.rgb());
             }
         }
-*/
+
         scene1->clear();
         scene2->clear();
 
@@ -392,16 +389,16 @@ void MainWindow::processNet(){
         ErrorView->addLine(iteration,-lastErrorBP*4,iteration+1,-currentErrorBP*4);
         ErrorView->addLine(iteration,-lastErrorMine*2,iteration+1,-CurrentErrorMine*2,coloredLine);
 
-           //scene1->addPixmap(QPixmap::fromImage(*imageScaled));
+           scene1->addPixmap(QPixmap::fromImage(*imageScaled));
            scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
 
            ui->graphicsView_2->setScene(scene2);
-           //ui->graphicsView->setScene( scene1 );
+           ui->graphicsView->setScene( scene1 );
 
 
            ui->graphicsView_3->setScene(ErrorView);
 
-           //ui->graphicsView->show();
+           ui->graphicsView->show();
            ui->graphicsView_2->show();
            ui->graphicsView_3->show();
 
