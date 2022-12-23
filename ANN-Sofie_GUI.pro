@@ -28,14 +28,12 @@ SOURCES += \
         layer.cpp \
         main.cpp \
         mainwindow.cpp \
-        neuralcluster.cpp \
-        neuralorder.cpp
+        neuralcluster.cpp
 
 HEADERS += \
         layer.h \
         mainwindow.h \
-        neuralcluster.h \
-        neuralorder.h
+        neuralcluster.h
 
 FORMS += \
         mainwindow.ui

@@ -8,7 +8,6 @@
 #include <QGraphicsScene>
 
 #include "neuralcluster.h"
-#include "neuralorder.h"
 
 namespace Ui {
 class MainWindow;
@@ -50,13 +49,14 @@ private:
     float currentErrorBP,CurrentErrorMine;
     float lastErrorBP,lastErrorMine;
 
+    int lengthOfRndVec = 128;
+    vector<float> generatedRandomVector;
     int currentFrequency = 0;
     float phase = 0;
     int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 8;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 16;
+    int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
+    int numHiddens = 24;
     int numAttentions = 0;
-    NeuralOrder* Cluster3;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;
     QTimer *timer;

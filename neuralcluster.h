@@ -29,8 +29,9 @@ public:
     float signum(float x);
     float minMax(float x);
     void resetSampler(bool randomize);
-    void applyLearning(float learningRate);
+    void applyLearning(float learningRate, float globalRMSError, int type);
     void resetDeltaMatrix();
+    int devideAndCorrect(vector<int> inputs, int self, float learningRate);
 
     vector<float> getActivation();
 
@@ -89,12 +90,16 @@ private:
 
     vector<float>         slope;
     vector<vector<float>> weightsActive;
+    vector<vector<float>> globMean;
+    vector<vector<float>> globDistErr0;
+    vector<vector<float>> globDistErr1;
     vector<vector<float>> biasesActive;
     vector<vector<float>> deltaMatrix;
     vector<float>         weightsNeurons;
     vector<vector<float>> momentum;
     vector<vector<int>>   firingMatrixCounter;
     vector<vector<float>> relativeBehaviour;
+    vector<vector<int>>   synapseType;
 
     vector<float>         momentumVector;
     int                   numInputs,numOutputs,numHiddens,numRekurrent;
@@ -103,7 +108,7 @@ private:
     vector<float>         error,lastError,beforeLasteError,approxError;
     vector<float>         outputError,inputError;
 
-    float                 samples,lastErrorSave;
+    float                 samples,lastErrorSave,lastGlobErr;
 
 };
 
