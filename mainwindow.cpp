@@ -149,6 +149,8 @@ void MainWindow::processNet(){
 
       }
         //Cluster0->resetDeltaMatrix();
+        Cluster0->propergateEmpty(16);
+        for(int f = numInputs; f < Cluster0->getActivation().size()-1; f++){ Cluster0->propergateImpulse(f,16);}
 
         if(iteration%1 == 0){
 

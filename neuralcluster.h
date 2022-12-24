@@ -31,7 +31,8 @@ public:
     void resetSampler(bool randomize);
     void applyLearning(float learningRate, float globalRMSError, int type);
     void resetDeltaMatrix();
-    int devideAndCorrect(vector<int> inputs, int self, float learningRate);
+    void propergateEmpty(int steps);
+    void propergateImpulse(int impulseNeuron, int steps);
 
     vector<float> getActivation();
 
@@ -42,6 +43,9 @@ private:
 
     int                   maxPeriod = 1;
 
+    vector<float>         emptyResponse;
+    vector<float>         impulseResponse;
+    int                   integrationTime;
     vector<float>         fireCounter;
     vector<float>         counterActivation;
     vector<float>         beforelastCounter;
