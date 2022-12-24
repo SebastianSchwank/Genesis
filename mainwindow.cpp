@@ -135,7 +135,7 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       Cluster0->applyLearning(0.05,(lastErrorMine/(numOutputs*numOutputs))*(squaredError/numOutputs),k/2);
+                       Cluster0->applyLearning(0.01,(lastErrorMine/(numOutputs*numOutputs))*(squaredError/numOutputs),k/2);
 
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
