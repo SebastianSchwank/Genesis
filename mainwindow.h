@@ -54,7 +54,7 @@ private:
     int currentFrequency = 0;
     float phase = 0;
     int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 5;//sizeof (output[0])/sizeof (output[0][0]);
+    int numOutputs = 4;//sizeof (output[0])/sizeof (output[0][0]);
     int numHiddens = 29;
     int numAttentions = 0;
     NeuralCluster* Cluster0;

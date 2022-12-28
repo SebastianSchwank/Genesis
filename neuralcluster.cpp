@@ -219,6 +219,7 @@ void NeuralCluster::propergateImpulse(int impulseNeuron, int steps){
         }
 
         lastReal = EnergyFlowReal;
+        //lastReal[impulseNeuron] = 0.0;
 
     }
 
@@ -278,7 +279,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float activationJ = (EnergyFlowReal[j]);
 
             weightsActive[i][j] -= activationI*((meanInput-1.0*lastReal[i]*(impulseResponse[i]-emptyResponse[i]))/weightsActive.size())*learningRate;
-            weightsActive[j][i] -= (activationJ)*(activationI)*((meanOutputInactive)/weightsActive.size())*learningRate;
+            weightsActive[j][i] -= (activationJ)*(activationI)*((meanOutputInactive-weightsActive[i][j])/weightsActive.size())*learningRate;
 
 
             //weightsActive[i][j] -= (1.0-activationJ)*activationI*(meanInput/weightsActive.size())*((1.0-minMax(mean[i]*weightsActive[j][i]-mean[j]*weightsActive[i][j]))*minMax(mean[i]*weightsActive[j][i]-mean[j]*weightsActive[i][j]))*learningRate;
