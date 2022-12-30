@@ -135,11 +135,11 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
+                       Cluster0->applyLearning(0.05,(squaredError/numOutputs),k/2);
 
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
 
-                   Cluster0->applyLearning(0.5,(squaredError/numOutputs),k/2);
                    //Cluster0->resetDeltaMatrix();
 
                    out0 = Cluster0->getTarget();
