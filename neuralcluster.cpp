@@ -289,7 +289,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //weightsActive[i][j] -= weightsActive[i][j]*(activationJ)*(activationI)*(0.25-abs((activationI-0.5)*(activationJ-0.5)))*learningRate;
 
 
-                weightsActive[i][j] -= activationI*((meanInputSignal+meanInput-lastReal[i]*(impulseResponse[i]-emptyResponse[i]))/weightsActive.size())*learningRate;
+                weightsActive[i][j] -= activationI*((meanInputSignal+meanInput-0.0*lastReal[i]*(impulseResponse[i]-emptyResponse[i]))/weightsActive.size())*learningRate;
                 weightsActive[j][i] -= ((activationJ)*(activationI))*((meanOutputInactive)/weightsActive.size())*learningRate;
 
                 //weightsActive[i][j] -= (activationJ)*(activationI)*((meanInputInactive)/weightsActive.size())*learningRate;
@@ -595,7 +595,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             samplerRealOutput[i] = EnergyOutputReal;
 
             samplerCounterInputSignal[i] = InputSignalCounter;
-            samplerRealInputSignal[i] = InputSignalReal-lastReal[i]*(impulseResponse[i]-emptyResponse[i]);
+            samplerRealInputSignal[i] = InputSignalReal-0.0*lastReal[i]*(impulseResponse[i]-emptyResponse[i]);
 
             samplerCounterOutputSignal[i] = OutputSignalCounter;
             samplerRealOutputSignal[i] = OutputSignalReal;
