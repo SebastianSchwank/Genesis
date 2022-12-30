@@ -356,7 +356,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
         for(int j = 0; j < weightsActive.size(); j++){
             weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*weightsActive.size()*2.0;
-            weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*weightsActive.size()*2.0;
+            //weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*weightsActive.size()*2.0;
 
             //Switch of some weights which are not nescessary
             //if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < weightsActive.size())){ weightsActive[i][j] = 0.0; }
