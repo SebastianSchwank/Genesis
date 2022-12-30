@@ -135,10 +135,11 @@ void MainWindow::processNet(){
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       Cluster0->applyLearning(0.01,(lastErrorMine/(numOutputs*numOutputs))*(squaredError/numOutputs),k/2);
 
                        //Cluster0->train(learningRate*0.01,lastError);
                    }
+
+                   Cluster0->applyLearning(0.5,(squaredError/numOutputs),k/2);
                    //Cluster0->resetDeltaMatrix();
 
                    out0 = Cluster0->getTarget();
@@ -149,8 +150,8 @@ void MainWindow::processNet(){
 
       }
         //Cluster0->resetDeltaMatrix();
-        Cluster0->propergateEmpty(16);
-        for(int f = numInputs; f < Cluster0->getActivation().size()-1; f++){ Cluster0->propergateImpulse(f,16);}
+        Cluster0->propergateEmpty(4);
+        for(int f = numInputs; f < Cluster0->getActivation().size()-1; f++){ Cluster0->propergateImpulse(f,4);}
 
         if(iteration%1 == 0){
 
