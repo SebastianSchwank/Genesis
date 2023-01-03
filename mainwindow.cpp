@@ -84,7 +84,7 @@ void MainWindow::processNet(){
         for(int o = 0; o < 1; o++){
 
 
-            //phase += 0.07;
+            phase += 0.07;
            for(int k = 0; k < (numOutputs)*2; k++){
             //Training pass
 
@@ -102,7 +102,7 @@ void MainWindow::processNet(){
                    vector<float> emptyVO;
                //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
 
-                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,0.5*(k/2+2),phase);
+                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,2.0*((k/2))+1,phase);
                    vector<float> targetV;// = MainWindow::inputFunction(2,numInputs,k+2,phase);
 
                    for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);

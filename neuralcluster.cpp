@@ -34,7 +34,7 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         vector<float> relativeBehaveColumn;
         vector<int> type;
 
-        int neuronType = (rand()%(numOutputs+1))-1;
+        int neuronType = -1;//(rand()%(numOutputs+1))-1;
         for(int j = 0; j < inputs+outputs+hidden+attention+1; j++){
             //if((j+i)%2 ==0) weightColumn.push_back(-0.001);
             //else  weightColumn.push_back(0.001);
@@ -255,6 +255,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         float meanInputSignal = 0.0;
         float meanActivity = 0.0;
         float absDeviation = 0.0;
+        float meanInputInactive = 0.0;
 
         float selfSignal = 0.0;
 
@@ -262,16 +263,16 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            if(weightsActive[j][i] < 0.0) meanOutput += (activationJ)*(weightsActive[j][i]);
-            else meanOutput += (1.0-activationJ)*(weightsActive[j][i]);
+             meanOutput += (activationJ)*(weightsActive[j][i]);
+
 
 
             if(weightsActive[i][j] < 0.0) meanInput += (activationJ)*(weightsActive[i][j]);
             else meanInput += (1.0-activationJ)*(weightsActive[i][j]);
-            meanInputSignal +=  (activationJ)*(weightsActive[i][j]);
+            meanInputSignal +=  activationJ*(weightsActive[i][j]);
 
             meanOutputInactive += (weightsActive[j][i]);
-            //meanInputInactive +=  (weightsActive[i][j]);
+            meanInputInactive +=  (weightsActive[i][j]);
             meanActivity += (activationJ);
 
             absDeviation += abs(activationJ-mean[j])*(weightsActive[i][j]);
@@ -294,8 +295,8 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
                 //weightsActive[i][j] += activationI*(activationI-mean[i])*(activationJ-mean[j])*abs(mean[i]-0.5)*learningRate;
                 //weightsActive[j][i] -= (activationJ)*abs(activationJ-mean[i])*(activationI-mean[i])*learningRate;
 
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*((meanInputSignal+meanInput-0.0*lastReal[i]*(impulseResponse[i]-emptyResponse[i]))/weightsActive.size())*learningRate*minMax(-16.0*relativeBehaviour[i][j]);
-            if(type == synapseType[i][j]||type == synapseType[j][i] || synapseType[j][i] == -1 || synapseType[i][j] == -1) weightsActive[j][i] -= ((activationJ)*(activationI))*((meanOutputInactive)/weightsActive.size())*learningRate*minMax(-16.0*relativeBehaviour[j][i]);
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*((meanInputSignal+meanInput-0.0*lastReal[i]*(impulseResponse[i]-emptyResponse[i]))/weightsActive.size())*learningRate*minMax(-16.0*relativeBehaviour[i][j])*globalRMSError;
+            if(type == synapseType[i][j]||type == synapseType[j][i] || synapseType[j][i] == -1 || synapseType[i][j] == -1) weightsActive[j][i] -= ((activationJ)*activationI)*((meanOutputInactive)/weightsActive.size())*learningRate*minMax(-16.0*relativeBehaviour[j][i])*minMax(16.0*relativeBehaviour[j][i])*globalRMSError;
 
                 //weightsActive[i][j] -= (activationJ)*(activationI)*((meanInputInactive)/weightsActive.size())*learningRate;
                 //weightsActive[j][i] -= ((activationI))*((meanOutput)/weightsActive.size())*learningRate;
@@ -332,13 +333,13 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
     float sumAbsWeights = 0.0;
     //Normalize the inputs and outputs of each neuron independently by random
     for(int i = 0; i < weightsActive.size(); i++)alreadyDone[i] = (false);
-    for(int m = 0; m < weightsActive.size()-1; m++){
+    for(int m = 0; m < weightsActive.size(); m++){
 
         //Select a random neuron which is not already corrected
         int i = -1;
         bool done = false;
         while(!done){
-                i = rand()%(weightsActive.size()-1);
+                i = rand()%(weightsActive.size());
                 if(alreadyDone[i] == false){
                     alreadyDone[i] = true;
                     done = true;
@@ -359,8 +360,8 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
-        for(int j = 0; j < weightsActive.size(); j++){
-            //weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*weightsActive.size()*2.0;
+        for(int j = 0; j < weightsActive.size()-1; j++){
+            if(i == weightsActive.size()-1) weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*weightsActive.size()*2.0;
             weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*weightsActive.size()*2.0;
 
             //Switch of some weights which are not nescessary
@@ -369,7 +370,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //if((i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (i < weightsActive.size()-16)&& (j < weightsActive.size()-1)){ weightsActive[i][j] = 0.0; }
             //if((i >= (weightsActive.size()-16))&& (j >= 0) && (i < weightsActive.size())&& (j < numInputs+numOutputs)){ weightsActive[i][j] = 0.0; }
 
-            if(i == j){ weightsActive[i][j] = 0.0; }
+            //if(i == j){ weightsActive[i][j] = 0.0; }
         }
     }
     for(int i = 0; i < weightsActive.size(); i++){
@@ -637,7 +638,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             //OutputSamplerReal[i] = (minMax(OutputIntegratorReal[i])+samples*OutputSamplerReal[i])/(samples+1.0);
 
             samplerRealEnergyBillance[i] = samplerRealInput[i]-samplerRealOutput[i];
-            EnergyFlowReal[i] =  minMax(samplerRealInputSignal[i]);
+            EnergyFlowReal[i] +=  minMax(samplerRealInputSignal[i])-lastReal[i];
 
             meanChanging[i] = (42.0*meanChanging[i]+abs(EnergyFlowReal[i]-lastReal[i]))/(43.0);
 
@@ -660,7 +661,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
 
         inputData(input,output);
 
-        for(int i = 0; i < weightsActive.size()-1; i++) mean[i] = (16.0*mean[i]+EnergyFlowReal[i])/(17.0);
+        for(int i = 0; i < weightsActive.size()-1; i++) mean[i] = (128.0*mean[i]+EnergyFlowReal[i])/(129.0);
 
         //if(hiddenWrite) for(int i = 0; i < input.size(); i++) samplerCounter[numInputs+numOutputs+numHiddens+i] = (samplerCounter[numInputs+numOutputs+numHiddens+i])*input[i];
         //if(hiddenWrite) for(int i = 0; i < input.size(); i++) samplerReal[numInputs+numOutputs+numHiddens+i] = (samplerReal[numInputs+numOutputs+numHiddens+i])*input[i];
