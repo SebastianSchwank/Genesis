@@ -112,7 +112,7 @@ void MainWindow::processNet(){
 
 
                    //Cluster0->propergateImpulse(8,inputV,targetV),
-                   Cluster0->propergateEmpty(4);
+
 
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
@@ -151,6 +151,8 @@ void MainWindow::processNet(){
             }
 
       }
+
+        Cluster0->propergateEmpty(8);
 
 
         if(iteration%1 == 0){
