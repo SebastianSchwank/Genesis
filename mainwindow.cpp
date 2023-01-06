@@ -84,7 +84,7 @@ void MainWindow::processNet(){
         for(int o = 0; o < 1; o++){
 
 
-            phase += 0.07;
+           phase += 0.07;
            for(int k = 0; k < (numOutputs)*2; k++){
             //Training pass
 
@@ -111,7 +111,8 @@ void MainWindow::processNet(){
                    targetV[k/2] = 1.0;
 
 
-
+                   //Cluster0->propergateImpulse(8,inputV,targetV),
+                   Cluster0->propergateEmpty(4);
 
                    Cluster0->resetSampler(false);
                    for(int i = 0; i < 9; i++){
@@ -130,14 +131,15 @@ void MainWindow::processNet(){
                    }
 
                    float learningRate = (sqrt(squaredError/numOutputs))-lastError;
-                    lastError = sqrt(squaredError/numOutputs);
+                    lastError = (squaredError/numOutputs);
+
+                    //Cluster0->propergateImpulse(9,inputV,targetV,0.5);
 
                    Cluster0->resetSampler(false);
+                   for(int i = 0; i < 9; i++) Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
                    for(int i = 0; i < 9; i++){
                        Cluster0->propergate(inputV,targetV,(1.0-lastError));
                        Cluster0->applyLearning(0.5,(squaredError/numOutputs),k/2);
-
-                       //Cluster0->train(learningRate*0.01,lastError);
                    }
 
                    //Cluster0->resetDeltaMatrix();
@@ -149,9 +151,7 @@ void MainWindow::processNet(){
             }
 
       }
-        //Cluster0->resetDeltaMatrix();
-        Cluster0->propergateEmpty(4);
-        for(int f = numInputs; f < Cluster0->getActivation().size()-1; f++){ Cluster0->propergateImpulse(f,4);}
+
 
         if(iteration%1 == 0){
 

@@ -23,7 +23,7 @@ public:
     void propergate(vector<float> input, vector<float> output, float energy);
     vector<vector<float>> getWeights();
     void train(float learningRate, float sqError);
-    void removeNonlin(float learningRate);
+    void pairFromTriple(float learningRate);
     void trainBP(vector<float> target,float learningRate,int iterations);
     vector<float> getTarget();
     float signum(float x);
@@ -32,7 +32,7 @@ public:
     void applyLearning(float learningRate, float globalRMSError, int type);
     void resetDeltaMatrix();
     void propergateEmpty(int steps);
-    void propergateImpulse(int impulseNeuron, int steps);
+    void propergateImpulse(int steps, vector<float> input, vector<float> output);
 
     vector<float> getActivation();
 
