@@ -43,6 +43,7 @@ private:
 
     int                   maxPeriod = 1;
 
+    vector<float>         integrationSpeed;
     vector<float>         emptyResponse;
     vector<float>         impulseResponse;
     int                   integrationTime;

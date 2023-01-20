@@ -83,6 +83,7 @@ void MainWindow::processNet(){
         vector<vector<vector<float>>> impulseResonses;
         offset += 0.07;
 
+        float squaredError = 0.0;
 
            for(int k = 0; k < (numOutputs); k++){
             //Training pass
@@ -126,7 +127,6 @@ void MainWindow::processNet(){
 
 
                    if(phase >= 2.0-2.0/integrationSteps){
-                   float squaredError = 0.0;
 
                    for(int i = 0; i < numOutputs; i++){
                        sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
@@ -168,10 +168,13 @@ void MainWindow::processNet(){
                    targetV[k] = 1.0;
 
                    //Cluster0->resetSampler(false);
-                       for(int i = 0; i < 4; i++){ Cluster0->propergate(inputV,targetV,(1.0-lastError));
+                       for(int i = 0; i < 4; i++){
+                           Cluster0->propergate(inputV,targetV,(1.0-lastError));
+                           Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
+                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
+                           //Cluster0->applyLearning(0.1,1.0,k);
 
                        }
-                       Cluster0->applyLearning(0.5,1.0,k);
 
                    //Cluster0->resetDeltaMatrix();
 
