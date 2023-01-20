@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
     Cluster0 = new NeuralCluster(numInputs,numOutputs,numHiddens,numAttentions);
 
     image = new QImage(Cluster0->getActivation().size(),Cluster0->getActivation().size()*2,QImage::Format_RGB32);
-    imageResp = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1),numLessons*numOutputs*4,QImage::Format_RGB32);
+    imageResp = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1),numLessons*numOutputs*4*integrationSteps,QImage::Format_RGB32);
 
     imageScaled = new QImage(Cluster0->getActivation().size()*2,Cluster0->getActivation().size()*4,QImage::Format_RGB32);
-    imageRespScaled = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1)*4,numLessons*numOutputs*4*4,QImage::Format_RGB32);
+    imageRespScaled = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1)*4,numLessons*numOutputs*4*4*integrationSteps,QImage::Format_RGB32);
 
     scene2 = new QGraphicsScene();
     scene1 = new QGraphicsScene();
@@ -80,16 +80,19 @@ void MainWindow::processNet(){
 
         //frequency = 4;
         float lastError = 0.0;
-        vector<vector<float>> impulseResonses;
-        for(int o = 0; o < 1; o++){
+        vector<vector<vector<float>>> impulseResonses;
+        offset += 0.07;
 
 
-           phase += 0.07;
-           for(int k = 0; k < (numOutputs)*2; k++){
+           for(int k = 0; k < (numOutputs); k++){
             //Training pass
 
-               phase += 0.5;
-               if(phase >= 1.0) phase -= 1.0;
+               vector<vector<float>> thisLesson;
+                Cluster0->resetSampler(false);
+                phase = 0.0;
+               for(float t = 0; phase < 2.0; t++){
+
+                   phase += 1.0/integrationSteps;
 
                //float phase = (1.0*rand()/RAND_MAX);
                //int k = rand()%numOutputs;
@@ -102,26 +105,27 @@ void MainWindow::processNet(){
                    vector<float> emptyVO;
                //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
 
-                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,2.0*((k/2))+1,phase);
+                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,2.0*((k))+1,phase+offset);
                    vector<float> targetV;// = MainWindow::inputFunction(2,numInputs,k+2,phase);
 
                    for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
 
                    for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
-                   targetV[k/2] = 1.0;
+                   targetV[k] = 1.0;
 
 
                    //Cluster0->propergateImpulse(8,inputV,targetV),
 
 
-                   Cluster0->resetSampler(false);
-                   for(int i = 0; i < 9; i++){
-                       Cluster0->propergate(inputV,emptyVO,1.0);
-                   }
+                   //Cluster0->resetSampler(false);
+                       for(int i = 0; i < 4; i++) Cluster0->propergate(inputV,emptyVO,1.0);
+
 
                    vector<float> out0 = Cluster0->getActivation();
-                   impulseResonses.push_back(out0);
+                   thisLesson.push_back(out0);
 
+
+                   if(phase >= 2.0-2.0/integrationSteps){
                    float squaredError = 0.0;
 
                    for(int i = 0; i < numOutputs; i++){
@@ -130,27 +134,51 @@ void MainWindow::processNet(){
                        //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
                    }
 
+
                    float learningRate = (sqrt(squaredError/numOutputs))-lastError;
                     lastError = (squaredError/numOutputs);
-
-                    //Cluster0->propergateImpulse(9,inputV,targetV,0.5);
-
-                   Cluster0->resetSampler(false);
-                   for(int i = 0; i < 9; i++) Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                   for(int i = 0; i < 9; i++){
-                       Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                       Cluster0->applyLearning(0.5,(squaredError/numOutputs),k/2);
                    }
+                    //Cluster0->propergateImpulse(9,inputV,targetV,0.5);
+               }
+
+               impulseResonses.push_back(thisLesson);
+            }
+
+           if(train){
+           for(int k = 0; k < (numOutputs); k++){
+               phase = 0.0;
+               Cluster0->resetSampler(false);
+
+               for(float t = 0; phase < 2.0; t++){
+
+                   phase += 1.0/integrationSteps;
+
+
+               //Create empty vector as output placeholder
+                   vector<float> emptyV;
+                   vector<float> emptyVO;
+               //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
+
+                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,2.0*((k))+1,phase+offset);
+                   vector<float> targetV;// = MainWindow::inputFunction(2,numInputs,k+2,phase);
+
+                   for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
+
+                   for(int i = 0; i < numOutputs; i++) targetV.push_back(0.0);
+                   targetV[k] = 1.0;
+
+                   //Cluster0->resetSampler(false);
+                       for(int i = 0; i < 4; i++){ Cluster0->propergate(inputV,targetV,(1.0-lastError));
+
+                       }
+                       Cluster0->applyLearning(0.5,1.0,k);
 
                    //Cluster0->resetDeltaMatrix();
 
-                   out0 = Cluster0->getTarget();
-                   impulseResonses.push_back(out0);
-
-
+                }
             }
+           }
 
-      }
 
         Cluster0->propergateEmpty(8);
 
@@ -158,15 +186,17 @@ void MainWindow::processNet(){
         if(iteration%1 == 0){
 
 
-        for(int x = 0; x < impulseResonses.size(); x++){
-            for(int y = 0; y < impulseResonses[0].size(); y++){
+            for(int less = 0; less < impulseResonses.size(); less++){
+        for(int x = 0; x < impulseResonses[0].size(); x++){
+            for(int y = 0; y < impulseResonses[0][0].size(); y++){
                 QColor col = QColor(128,128,128);
-                float colorVal = (2.0/(1.0+(exp(-impulseResonses[x][y]))))-1.0;
+                float colorVal = (2.0/(1.0+(exp(-impulseResonses[less][x][y]))))-1.0;
                 if(colorVal > 0.0) col = QColor(255.0*abs(colorVal),255.0*abs(0.0),255.0*abs(0.0));
                 if(colorVal < 0.0) col = QColor(255.0*abs(0.0),255.0*abs(0.0),255.0*abs(colorVal));
-                imageResp->setPixel(y,x,col.rgb());
+                imageResp->setPixel(y,x+less*impulseResonses[0].size(),col.rgb());
             }
         }
+            }
 
 
         float max = 0.0;
@@ -198,7 +228,7 @@ void MainWindow::processNet(){
         if(!imageScaled->isNull()) delete imageScaled;
         if(!imageRespScaled->isNull()) delete imageRespScaled;
         imageScaled = new QImage(Cluster0->getActivation().size()*6,Cluster0->getActivation().size()*6,QImage::Format_RGB32);
-        imageRespScaled = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1)*8,numLessons*numOutputs*4*4,QImage::Format_RGB32);
+        imageRespScaled = new QImage((numInputs+numOutputs+numHiddens+numAttentions+1)*8,numLessons*numOutputs*4*4*integrationSteps,QImage::Format_RGB32);
         QSize pixSize1 = imageScaled->size();
         QSize pixSize2 = imageRespScaled->size();
         *imageScaled = (image->scaled(pixSize1, Qt::KeepAspectRatio));
@@ -289,3 +319,9 @@ void MainWindow::on_pushButton_2_clicked()
 {
     this->processNet();
 }
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    train = !train;
+}
+
