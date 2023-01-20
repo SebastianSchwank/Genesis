@@ -81,7 +81,7 @@ void MainWindow::processNet(){
         //frequency = 4;
         float lastError = 0.0;
         vector<vector<vector<float>>> impulseResonses;
-        offset += 0.07;
+        offset += 0.07;//1.0*rand()/RAND_MAX;
 
         float squaredError = 0.0;
 
@@ -91,9 +91,9 @@ void MainWindow::processNet(){
                vector<vector<float>> thisLesson;
                 Cluster0->resetSampler(false);
                 phase = 0.0;
-               for(float t = 0; phase < 2.0; t++){
+               for(float t = 0; phase < 4.0; t++){
 
-                   phase += 1.0/integrationSteps;
+                   phase += 2.0/integrationSteps;
 
                //float phase = (1.0*rand()/RAND_MAX);
                //int k = rand()%numOutputs;
@@ -126,7 +126,7 @@ void MainWindow::processNet(){
                    thisLesson.push_back(out0);
 
 
-                   if(phase >= 2.0-2.0/integrationSteps){
+                   if(phase >= 4.0-2.0/integrationSteps){
 
                    for(int i = 0; i < numOutputs; i++){
                        sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
@@ -149,9 +149,9 @@ void MainWindow::processNet(){
                phase = 0.0;
                Cluster0->resetSampler(false);
 
-               for(float t = 0; phase < 2.0; t++){
+               for(float t = 0; phase < 4.0; t++){
 
-                   phase += 1.0/integrationSteps;
+                   phase += 2.0/integrationSteps;
 
 
                //Create empty vector as output placeholder
@@ -170,11 +170,12 @@ void MainWindow::processNet(){
                    //Cluster0->resetSampler(false);
                        for(int i = 0; i < 4; i++){
                            Cluster0->propergate(inputV,targetV,(1.0-lastError));
-                           Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
+                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
+                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
                            //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
                            //Cluster0->applyLearning(0.1,1.0,k);
-
                        }
+                       Cluster0->applyLearning(0.125,1.0,k);
 
                    //Cluster0->resetDeltaMatrix();
 
@@ -287,7 +288,7 @@ void MainWindow::processNet(){
         coloredLine.setColor(col);
         ErrorView->addLine(iteration,0,iteration+1,0);
         ErrorView->addLine(iteration,-lastErrorBP*5,iteration+1,-currentErrorBP*5);
-        ErrorView->addLine(iteration,-lastErrorMine*5,iteration+1,-CurrentErrorMine*5,coloredLine);
+        ErrorView->addLine(iteration,-lastErrorMine*4,iteration+1,-CurrentErrorMine*4,coloredLine);
 
            scene1->addPixmap(QPixmap::fromImage(*imageScaled));
            scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
