@@ -29,6 +29,8 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_pushButton_4_clicked();
+
 private:
     vector<float> inputFunction(int type, int length, float frequency, float phase);
 
@@ -44,12 +46,11 @@ private:
     QGraphicsScene* scene2;
     QGraphicsScene* scene1;
 
-    bool running = false;
 
-    int integrationSteps = 20;
+    int integrationSteps = 12;
     float offset = 0.0;
 
-    int numLessons = 1;//sizeof (input)/sizeof (input[0]);
+    int numLessons = 3;//sizeof (input)/sizeof (input[0]);
     int iteration = 0;
     float currentErrorBP,CurrentErrorMine;
     float lastErrorBP,lastErrorMine;
@@ -60,14 +61,18 @@ private:
     float phase = 0;
     int numInputs = 32;//sizeof (input[0])/sizeof (input[0][0]);
     int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 8;
+    int numHiddens = 32;
     int numAttentions = 0;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;
     QTimer *timer;
     QGraphicsScene* ErrorView;
 
+    vector<float> indexArray;
+
     bool train = true;
+    bool running = false;
+    bool graphics = true;
 
 };
 

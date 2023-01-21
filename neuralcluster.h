@@ -113,7 +113,7 @@ private:
     vector<float>         error,lastError,beforeLasteError,approxError;
     vector<float>         outputError,inputError;
 
-    float                 samples,lastErrorSave,lastGlobErr;
+    float                 samples,lastErrorSave,lastGlobErr,lastEnergy;
 
 };
 

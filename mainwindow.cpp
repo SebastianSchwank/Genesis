@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     currentErrorBP = 0.0;
     CurrentErrorMine = 0.0;
 
+    for(int i = 0; i < numOutputs; i++) indexArray.push_back(rand()%numLessons);
+
     for(int i = 0; i < lengthOfRndVec; i++) generatedRandomVector.push_back( ((-1.0*rand()/(RAND_MAX)*abs(1.0-0.0)+1.0*rand()/RAND_MAX)*abs(0.0-1.0)/(abs(1.0-0.0)+abs(0.0-1.0))));
 
 }
@@ -85,7 +87,7 @@ void MainWindow::processNet(){
 
         float squaredError = 0.0;
 
-           for(int k = 0; k < (numOutputs); k++){
+           for(int k = 0; k < (numLessons); k++){
             //Training pass
 
                vector<vector<float>> thisLesson;
@@ -119,7 +121,7 @@ void MainWindow::processNet(){
 
 
                    //Cluster0->resetSampler(false);
-                       for(int i = 0; i < 4; i++) Cluster0->propergate(inputV,emptyVO,1.0);
+                       for(int i = 0; i < 4; i++) Cluster0->propergate(inputV,emptyVO,0.0);
 
 
                    vector<float> out0 = Cluster0->getActivation();
@@ -145,7 +147,7 @@ void MainWindow::processNet(){
             }
 
            if(train){
-           for(int k = 0; k < (numOutputs); k++){
+           for(int k = 0; k < (numLessons); k++){
                phase = 0.0;
                Cluster0->resetSampler(false);
 
@@ -168,15 +170,44 @@ void MainWindow::processNet(){
                    targetV[k] = 1.0;
 
                    //Cluster0->resetSampler(false);
+                   float lastSquaredErr = 1.0;
+                   float sqaredErr = 0.0;
                        for(int i = 0; i < 4; i++){
-                           Cluster0->propergate(inputV,targetV,(1.0-lastError));
+                           Cluster0->propergate(inputV,emptyVO,(pow(lastSquaredErr/(numOutputs),0.5)));
+
+                           vector<float> out0 = Cluster0->getActivation();
+                           sqaredErr = 0.0;
+                           for(int i = 0; i < numOutputs; i++){
+                               sqaredErr += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
+                               //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
+                           }
+
+
+                           if(sqaredErr < lastSquaredErr) lastSquaredErr = sqaredErr;
+                           Cluster0->applyLearning(0.05,(1.0-pow(lastSquaredErr/(numOutputs),0.5)),k);
+
+
+                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
+
                            //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
                            //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
                            //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
                            //Cluster0->applyLearning(0.1,1.0,k);
                        }
-                       Cluster0->applyLearning(0.125,1.0,k);
 
+/*
+                       float maxOut = 0.0;
+                       int maxIndex = 0;
+                       for(int i = 0; i < numOutputs; i++){
+                           if(out0[i+numInputs] > maxOut){
+                               maxIndex = i;
+                               maxOut = out0[i+numInputs];
+                           }
+                       }
+                       int swap = indexArray[k];
+                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
+                       indexArray[k] = maxIndex;
+*/
                    //Cluster0->resetDeltaMatrix();
 
                 }
@@ -187,16 +218,17 @@ void MainWindow::processNet(){
         Cluster0->propergateEmpty(8);
 
 
-        if(iteration%1 == 0){
+        if(graphics){
 
 
             for(int less = 0; less < impulseResonses.size(); less++){
         for(int x = 0; x < impulseResonses[0].size(); x++){
             for(int y = 0; y < impulseResonses[0][0].size(); y++){
-                QColor col = QColor(128,128,128);
+                QColor col;
                 float colorVal = (2.0/(1.0+(exp(-impulseResonses[less][x][y]))))-1.0;
-                if(colorVal > 0.0) col = QColor(255.0*abs(colorVal),255.0*abs(0.0),255.0*abs(0.0));
-                if(colorVal < 0.0) col = QColor(255.0*abs(0.0),255.0*abs(0.0),255.0*abs(colorVal));
+                col = QColor(colorVal*64,colorVal*64,colorVal*255);
+                if(y < numInputs)col = QColor(colorVal*255,colorVal*64,colorVal*64);
+                if((y >= numInputs) && (y < numInputs+numOutputs))col = QColor(colorVal*64,colorVal*255,colorVal*64);
                 imageResp->setPixel(y,x+less*impulseResonses[0].size(),col.rgb());
             }
         }
@@ -225,7 +257,6 @@ void MainWindow::processNet(){
         scene1->clear();
         scene2->clear();
 
-        }
 
 
 
@@ -277,6 +308,14 @@ void MainWindow::processNet(){
 */
 
 
+        scene1->addPixmap(QPixmap::fromImage(*imageScaled));
+        scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
+
+        ui->graphicsView_2->setScene(scene2);
+        ui->graphicsView->setScene( scene1 );
+
+        }
+
         lastErrorMine = CurrentErrorMine;
         CurrentErrorMine = sumErrorOver;
 
@@ -290,11 +329,6 @@ void MainWindow::processNet(){
         ErrorView->addLine(iteration,-lastErrorBP*5,iteration+1,-currentErrorBP*5);
         ErrorView->addLine(iteration,-lastErrorMine*4,iteration+1,-CurrentErrorMine*4,coloredLine);
 
-           scene1->addPixmap(QPixmap::fromImage(*imageScaled));
-           scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
-
-           ui->graphicsView_2->setScene(scene2);
-           ui->graphicsView->setScene( scene1 );
 
 
            ui->graphicsView_3->setScene(ErrorView);
@@ -327,5 +361,11 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pushButton_3_clicked()
 {
     train = !train;
+}
+
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    graphics = !graphics;
 }
 
