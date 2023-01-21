@@ -59,7 +59,7 @@ private:
     vector<float> generatedRandomVector;
     int currentFrequency = 0;
     float phase = 0;
-    int numInputs = 32;//sizeof (input[0])/sizeof (input[0][0]);
+    int numInputs = 38;//sizeof (input[0])/sizeof (input[0][0]);
     int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
     int numHiddens = 32;
     int numAttentions = 0;

@@ -128,8 +128,6 @@ void MainWindow::processNet(){
                    thisLesson.push_back(out0);
 
 
-                   if(phase >= 4.0-2.0/integrationSteps){
-
                    for(int i = 0; i < numOutputs; i++){
                        sumErrorOver += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
                        squaredError += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
@@ -139,7 +137,6 @@ void MainWindow::processNet(){
 
                    float learningRate = (sqrt(squaredError/numOutputs))-lastError;
                     lastError = (squaredError/numOutputs);
-                   }
                     //Cluster0->propergateImpulse(9,inputV,targetV,0.5);
                }
 
@@ -185,7 +182,7 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //lastSquaredErr = sqaredErr;
-                           Cluster0->applyLearning(0.05,(1.0-pow(lastSquaredErr/(numOutputs),0.5)),k);
+                           Cluster0->applyLearning(0.05,exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps/2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
 
 
                            //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
@@ -318,7 +315,7 @@ void MainWindow::processNet(){
         }
 
         lastErrorMine = CurrentErrorMine;
-        CurrentErrorMine = sumErrorOver;
+        CurrentErrorMine = sumErrorOver/numLessons;
 
         lastErrorBP = currentErrorBP;
         currentErrorBP = sumErrorOverBP;
