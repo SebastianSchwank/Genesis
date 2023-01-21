@@ -34,7 +34,7 @@ w[i][j] += activation_without_result[j]*(activation_with_result[i]-activation_wi
 As activation function I take the sigmoide function: https://de.wikipedia.org/wiki/Sigmoidfunktion
 
 Screenshot of the weights matrix of the three layered network which learns to detect the frequency of a sampled sine wave:
-![Screenshot](https://github.com/SebastianSchwank/ANN-Sofie/blob/master/ANN-Sofie-Generalisation.png)
+![Screenshot](https://github.com/SebastianSchwank/Genesis/blob/main/selfSupervised.png)
 
 If you want to give feedback to the calculus or the algorythm, don't hesitate to write an e-mail:
 sebastian.schwank@googlemail.com
