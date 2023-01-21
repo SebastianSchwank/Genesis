@@ -172,8 +172,8 @@ void MainWindow::processNet(){
                    //Cluster0->resetSampler(false);
                    float lastSquaredErr = 1.0;
                    float sqaredErr = 0.0;
-                       for(int i = 0; i < 4; i++){
-                           Cluster0->propergate(inputV,emptyVO,(pow(lastSquaredErr/(numOutputs),0.5)));
+                       for(int i = 0; i < 8 || sqaredErr < lastSquaredErr; i++){
+                           Cluster0->propergate(inputV,emptyVO,(pow(sqaredErr/(numOutputs),0.5)));
 
                            vector<float> out0 = Cluster0->getActivation();
                            sqaredErr = 0.0;
@@ -183,7 +183,8 @@ void MainWindow::processNet(){
                            }
 
 
-                           if(sqaredErr < lastSquaredErr) lastSquaredErr = sqaredErr;
+                           lastSquaredErr = sqaredErr;
+                           //lastSquaredErr = sqaredErr;
                            Cluster0->applyLearning(0.05,(1.0-pow(lastSquaredErr/(numOutputs),0.5)),k);
 
 

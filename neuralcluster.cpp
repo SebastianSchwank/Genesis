@@ -731,7 +731,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             samplerRealOutput[i] = EnergyOutputReal;
 
             samplerCounterInputSignal[i] = InputSignalCounter;
-            samplerRealInputSignal[i] = 24.0*(InputSignalReal-1.0*beforelastReal[i]*(impulseResponse[i]))/EnergyInputReal;
+            samplerRealInputSignal[i] = 24.0*(InputSignalReal/EnergyInputReal-1.0*beforelastReal[i]*(impulseResponse[i])/weightsActive.size());
 
             samplerCounterOutputSignal[i] = OutputSignalCounter;
             samplerRealOutputSignal[i] = OutputSignalReal;
