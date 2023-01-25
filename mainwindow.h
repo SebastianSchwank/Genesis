@@ -47,10 +47,10 @@ private:
     QGraphicsScene* scene1;
 
 
-    int integrationSteps = 12;
+    int integrationSteps = 7;
     float offset = 0.0;
 
-    int numLessons = 4;//sizeof (input)/sizeof (input[0]);
+    int numLessons = 3;//sizeof (input)/sizeof (input[0]);
     int iteration = 0;
     float currentErrorBP,CurrentErrorMine;
     float lastErrorBP,lastErrorMine;
@@ -60,7 +60,7 @@ private:
     int currentFrequency = 0;
     float phase = 0;
     int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 4;//sizeof (output[0])/sizeof (output[0][0]);
+    int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
     int numHiddens = 24;
     int numAttentions = 0;
     NeuralCluster* Cluster0;

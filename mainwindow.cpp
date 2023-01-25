@@ -210,6 +210,75 @@ void MainWindow::processNet(){
 
                 }
             }
+
+
+           for(int k = 0; k < (numLessons); k++){
+               phase = 0.0;
+               Cluster0->resetSampler(false);
+
+               for(float t = 0; phase < 4.0; t++){
+
+                   phase += 2.0/integrationSteps;
+
+
+               //Create empty vector as output placeholder
+                   vector<float> emptyV;
+                   vector<float> emptyVO;
+               //Create input vector for holding the input data (Frequency is random Waveform depends on the lesson number (is mapped to output-neurons))
+
+                   vector<float> inputV = MainWindow::inputFunction(2,numInputs,2.0*((k))+1,phase+offset);
+                   vector<float> targetV;// = MainWindow::inputFunction(2,numInputs,k+2,phase);
+
+                   for(int i = 0; i < numInputs; i++) emptyV.push_back(0.0);
+
+                   for(int i = 0; i < numOutputs; i++) targetV.push_back(1.0);
+                   targetV[k] = 0.0;
+
+                   //Cluster0->resetSampler(false);
+                   float lastSquaredErr = 1.0;
+                   float sqaredErr = 0.0;
+                       for(int i = 0; i < 4; i++){
+                           Cluster0->propergate(inputV,emptyVO,(1.0-pow(sqaredErr/(numOutputs),0.5)));
+
+                           vector<float> out0 = Cluster0->getActivation();
+                           sqaredErr = 0.0;
+                           for(int i = 0; i < numOutputs; i++){
+                               sqaredErr += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
+                               //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
+                           }
+
+
+                           lastSquaredErr = sqaredErr;
+                           //lastSquaredErr = sqaredErr;
+                           Cluster0->applyLearning(0.01,(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
+
+
+                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
+
+                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
+                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
+                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
+                           //Cluster0->applyLearning(0.1,1.0,k);
+                       }
+
+/*
+                       float maxOut = 0.0;
+                       int maxIndex = 0;
+                       for(int i = 0; i < numOutputs; i++){
+                           if(out0[i+numInputs] > maxOut){
+                               maxIndex = i;
+                               maxOut = out0[i+numInputs];
+                           }
+                       }
+                       int swap = indexArray[k];
+                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
+                       indexArray[k] = maxIndex;
+*/
+                   //Cluster0->resetDeltaMatrix();
+
+                }
+            }
+
            }
 
 
