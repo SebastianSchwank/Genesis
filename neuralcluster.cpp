@@ -34,7 +34,9 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
         vector<float> relativeBehaveColumn;
         vector<int> type;
 
+
         int neuronType = -1;//(rand()%(numOutputs+1))-1;
+        vector<bool> maskV;
         for(int j = 0; j < inputs+outputs+hidden+attention+1; j++){
             //if((j+i)%2 ==0) weightColumn.push_back(-0.001);
             //else  weightColumn.push_back(0.001);
@@ -51,9 +53,10 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
             if((i >= numInputs && i < numInputs+numOutputs) || (i == (weightsActive.size()-1))) neuronType = -1;
             if((j >= numInputs && j < numInputs+numOutputs) || (j == (weightsActive.size()-1))) neuronType = -1;
 
-
+            maskV.push_back(false);
             type.push_back(neuronType);
         }
+        mask.push_back(maskV);
         synapseType.push_back(type);
         relativeBehaviour.push_back(relativeBehaveColumn);
         firingMatrixCounter.push_back(firingColumn);
@@ -117,6 +120,12 @@ NeuralCluster::NeuralCluster(int inputs, int outputs, int hidden, int attention)
     fireCounter[fireCounter.size()-1] = 1.0;
     fireReal[fireReal.size()-1] = 1.0;
 
+    for(int i = 0; i < weightsActive.size(); i++){
+        for(int j = 0; j < weightsActive.size()-1; j++){
+            if(mask[i][j] == false) mask[j][i] = (rand()%3) == true;
+            if(mask[j][i] == false) mask[i][j] = (rand()%3) == true;
+        }
+    }
 
 
 }
@@ -338,6 +347,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         float meanActivity = 0.0;
         float absDeviation = 0.0;
         float meanInputEnergy = 0.0;
+        float balanceSignal = 0.0;
 
         float selfSignal = 0.0;
 
@@ -349,12 +359,15 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
 
 
+            balanceSignal += 2.0*(activationJ-0.5)*weightsActive[i][j];
+
+
             if(weightsActive[i][j] < 0.0) meanInput += (activationJ)*(weightsActive[i][j]);
             else meanInput += (1.0-activationJ)*(weightsActive[i][j]);
             meanInputSignal +=  lastReal[j]*(weightsActive[i][j]);
 
             meanOutputInactive += (weightsActive[j][i]);
-            meanInputEnergy +=  (1.0-lastReal[j])*abs(weightsActive[i][j]);
+            meanInputEnergy +=  (lastReal[j])*abs(weightsActive[i][j]);
             meanActivity += (activationJ);
 
             absDeviation += abs(activationJ-mean[j])*(weightsActive[i][j]);
@@ -419,17 +432,22 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
 
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] += (coresspondenceOut)/weightsActive.size()*activationI*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] += (0.5-activationI)*(balanceSignal/weightsActive.size()-0.0*lastReal[i]*(impulseResponse[i])/weightsActive.size())*learningRate*globalRMSError;//*gradient*4.0;//*minMax(-8.0*((activationI)*(1.0-activationI)-(activationJ)*(1.0-activationJ)));//*minMax(16.0*relativeBehaviour[i][j]);
 
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*((+meanInputSignal)/weightsActive.size()-1.0*lastReal[i]*(impulseResponse[i])/weightsActive.size())*learningRate*globalRMSError;//*gradient*4.0;//*minMax(-8.0*((activationI)*(1.0-activationI)-(activationJ)*(1.0-activationJ)));//*minMax(16.0*relativeBehaviour[i][j]);
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-activationJ)*activationI*(balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size()-0.0*lastReal[i]*(impulseResponse[i])/weightsActive.size())*learningRate*globalRMSError;//*gradient*4.0;//*minMax(-8.0*((activationI)*(1.0-activationI)-(activationJ)*(1.0-activationJ)));//*minMax(16.0*relativeBehaviour[i][j]);
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(activationJ)*meanOutputInactive/weightsActive.size()-0.0*(1.0-activationJ)*(activationI)*(activationJ)*meanOutput/weightsActive.size())*learningRate*globalRMSError;            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI)*activationJ*(meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;//*gradient*4.0;//*minMax(-8.0*((activationI)*(1.0-activationI)-(activationJ)*(1.0-activationJ)));//*minMax(16.0*relativeBehaviour[i][j]);
+
+
+
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] += activationJ*activationI*(coresspondenceIn+coresspondenceOut)/weightsActive.size()*learningRate*globalRMSError;//*minMax(16.0*relativeBehaviour[i][j]);
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (impulseResponse[i])/(weightsActive.size())*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationJ*activationI*(impulseResponse[j]+impulseResponse[i])/(weightsActive.size())*learningRate*globalRMSError;
 
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (coresspondence)/weightsActive.size()*gradient*learningRate*globalRMSError;
 
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= meanChanging[j]*meanChanging[i]*learningRate*minMax(-16.0*relativeBehaviour[i][j])*minMax(16.0*relativeBehaviour[i][j])*(globalRMSError);
             float meanIn = 0.0;
             for(int k = 0; k < weightsActive.size(); k++) meanIn += weightsActive[k][i];
-            if(type == synapseType[i][j]||type == synapseType[j][i] || synapseType[j][i] == -1 || synapseType[i][j] == -1) weightsActive[j][i] -= (activationJ)*activationI*((meanOutputInactive)/weightsActive.size())*minMax(12.0*(((activationI)*(1.0-activationI))-(activationJ)*(1.0-activationJ)))*learningRate*(globalRMSError);//*minMax(-16.0*relativeBehaviour[i][j]);//*minMax(-16.0*relativeBehaviour[i][j])*4.0;
+            //if(type == synapseType[i][j]||type == synapseType[j][i] || synapseType[j][i] == -1 || synapseType[i][j] == -1) weightsActive[j][i] -= (activationJ)*activationI*((meanOutputInactive)/weightsActive.size())*minMax(12.0*(((activationI)*(1.0-activationI))-(activationJ)*(1.0-activationJ)))*learningRate*(globalRMSError);//*minMax(-16.0*relativeBehaviour[i][j]);//*minMax(-16.0*relativeBehaviour[i][j])*4.0;
 
                 //weightsActive[i][j] -= (activationJ)*(activationI)*((meanInputInactive)/weightsActive.size())*learningRate;
                 //weightsActive[j][i] -= ((activationI))*((meanOutput)/weightsActive.size())*learningRate;
@@ -460,7 +478,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
 
         //float activationI = (EnergyFlowReal[i]);
-        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal+1.0*weightsActive[i][weightsActive.size()-1]-1.0*lastReal[i]*(impulseResponse[i]))/weightsActive.size()*learningRate;
+        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal+1.0*weightsActive[i][weightsActive.size()-1]-0.0*lastReal[i]*(impulseResponse[i]))/weightsActive.size()*learningRate;
     }
 
     float sumAbsWeights = 0.0;
@@ -488,6 +506,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //if((i >= 0)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
             if(i != j && (i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (i < weightsActive.size())&& (j < weightsActive.size()-1)){ weightsActive[i][j] = 0.0; }
             //if((i >= (weightsActive.size()-1))&& (j >= 0) && (i <= weightsActive.size())){ weightsActive[i][j] = 0.0; }
+            //if(mask[i][j]){ weightsActive[i][j] = 0.0; }
 
             if(i == j){ weightsActive[i][j] = 0.0; }
         }
@@ -687,13 +706,13 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
 
                 if(weightsActive[i][j] < 0.0) inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[i][j])*activationI;
                 else inPatternAnomaly -= (activationJ)*abs(weightsActive[i][j])*activationI;
-
+/*
                 if(weightsActive[j][i] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[j][i])*activationI;
                 else inPatternAnomaly += (1.0-activationJ)*abs(weightsActive[j][i])*activationI;
 
                 if(weightsActive[j][i] < 0.0) inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[j][i])*activationI;
                 else inPatternAnomaly -= (activationJ)*abs(weightsActive[j][i])*activationI;
-
+*/
 
 
                     InputSignalCounter +=  fireCounter[j]*(weightsActive[i][j]+deltaMatrix[i][j]);//*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireCounter[j]-fireCounter[i]));

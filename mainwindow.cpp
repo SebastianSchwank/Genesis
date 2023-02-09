@@ -182,7 +182,7 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //lastSquaredErr = sqaredErr;
-                           Cluster0->applyLearning(0.01,(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
+                           Cluster0->applyLearning(0.5,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
 
 
                            //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
@@ -250,7 +250,7 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //lastSquaredErr = sqaredErr;
-                           Cluster0->applyLearning(0.01,(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
+                           Cluster0->applyLearning(0.1,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
 
 
                            //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
