@@ -1,3 +1,6 @@
+
+
+
 #Bi-Neuronal Network
 - Native Self Supervised learning 
 - Error free, Derivative free learning
@@ -49,3 +52,5 @@ This software is written by Sebastian Schwank. These three sentences have to be 
 TODO:
 
 Cuda Implementation
+
+For my doughter
