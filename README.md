@@ -1,8 +1,5 @@
-
-
-
 #Bi-Neuronal Network
-- Native Self Supervised learning (similar to Reinforcement learning (model free/direct reinforcement learning)))
+- Native Self Supervised learning 
 - Error free, Derivative free learning
 - Neuron locale solution
 - The architecture is a multiple layered connected neural network with feedback connections
@@ -52,5 +49,3 @@ This software is written by Sebastian Schwank. These three sentences have to be 
 TODO:
 
 Cuda Implementation
-
-For my doughter

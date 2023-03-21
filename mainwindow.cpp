@@ -40,22 +40,6 @@ MainWindow::~MainWindow()
 
 vector<float> MainWindow::inputFunction(int type, int length,float frequency,float phase){
     vector<float> function;
-    /*
-    if(type == 0){
-        int toggle = 0;
-        for(int i = 0; i < length; i++){
-            if(((i+phase)%(periode)) == 0) toggle = 1-toggle;
-            if(toggle == 0) function.push_back(1.0);
-            if(toggle == 1) function.push_back(0.0);
-        }
-    }
-    if(type == 1){
-        for(int i = 0; i < length; i++){
-            if(((i+phase)%(periode)) == 0) function.push_back(1.0);
-            else function.push_back(0.0);
-        }
-    }
-    */
     if(type == 2){
         for(int i = 0; i < length; i++){
           function.push_back(0.5+(0.5*(sin(2.0*3.16*((frequency*i/length)+phase)))));
@@ -181,33 +165,10 @@ void MainWindow::processNet(){
 
 
                            lastSquaredErr = sqaredErr;
-                           //lastSquaredErr = sqaredErr;
+                           //Direct Reinforcment learning
                            Cluster0->applyLearning(0.5,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
 
-
-                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
-
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,1.0,k);
                        }
-
-/*
-                       float maxOut = 0.0;
-                       int maxIndex = 0;
-                       for(int i = 0; i < numOutputs; i++){
-                           if(out0[i+numInputs] > maxOut){
-                               maxIndex = i;
-                               maxOut = out0[i+numInputs];
-                           }
-                       }
-                       int swap = indexArray[k];
-                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
-                       indexArray[k] = maxIndex;
-*/
-                   //Cluster0->resetDeltaMatrix();
-
                 }
             }
 
@@ -244,37 +205,13 @@ void MainWindow::processNet(){
                            sqaredErr = 0.0;
                            for(int i = 0; i < numOutputs; i++){
                                sqaredErr += (targetV[i]-out0[i+numInputs])*(targetV[i]-out0[i+numInputs]);
-                               //out0[i+numInputs] = abs(targetV[i]-out0[i+numInputs]);
                            }
 
 
                            lastSquaredErr = sqaredErr;
-                           //lastSquaredErr = sqaredErr;
+                           //Direct Reinforcement learning
                            Cluster0->applyLearning(0.1,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
-
-
-                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
-
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,1.0,k);
                        }
-
-/*
-                       float maxOut = 0.0;
-                       int maxIndex = 0;
-                       for(int i = 0; i < numOutputs; i++){
-                           if(out0[i+numInputs] > maxOut){
-                               maxIndex = i;
-                               maxOut = out0[i+numInputs];
-                           }
-                       }
-                       int swap = indexArray[k];
-                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
-                       indexArray[k] = maxIndex;
-*/
-                   //Cluster0->resetDeltaMatrix();
 
                 }
             }
@@ -335,45 +272,6 @@ void MainWindow::processNet(){
         QSize pixSize2 = imageRespScaled->size();
         *imageScaled = (image->scaled(pixSize1, Qt::KeepAspectRatio));
         *imageRespScaled = (imageResp->scaled(pixSize2, Qt::KeepAspectRatio));
-
-
-        //image = new QImage(ClusterBP->getActivation().size()*2,ClusterBP->getActivation().size()*2,QImage::Format_RGB32);
-
-        /*
-        for(int x = 0; x < ClusterBP->getActivation().size()*2; x++){
-            for(int y = 0; y < ClusterBP->getActivation().size()*2; y++){
-                QColor col = QColor(128,128,128);
-
-                if(ClusterBP->getWeights()[y/2][x/2] > 0.0) col = QColor(255.0*1.0/(1.0+exp(-ClusterBP->getWeights()[y/2][x/2])),0,0);
-                if(ClusterBP->getWeights()[y/2][x/2] < 0.0) col = QColor(0,0,255.0*1.0/(1.0+exp(ClusterBP->getWeights()[y/2][x/2])));
-
-                image->setPixel(x,y,col.rgb());
-            }
-        }
-        */
-
-        //float movingMeanRandomnessFactor =
-/*
-        float unshapedMeanOver = 0.0;
-        //Vary size of random Vec on Precicion needed
-        for(int i = 0; i < generatedRandomVector.size(); i++) unshapedMeanOver += generatedRandomVector[i];
-        unshapedMeanOver /= generatedRandomVector.size();
-
-        float expShapedWheightedMeanOver = 0.0;
-
-        for(int i = 0; i < generatedRandomVector.size(); i++) expShapedWheightedMeanOver += generatedRandomVector[i]*exp(0.01*i);
-        expShapedWheightedMeanOver /= generatedRandomVector.size();
-
-        if(generatedRandomVector.size() > lengthOfRndVec) generatedRandomVector.erase(generatedRandomVector.begin());
-
-
-        float rndNbrProb = 10*(0.1+abs(expShapedWheightedMeanOver))*(2.0/(1.0+exp(-(-(1.0*rand()/RAND_MAX)+(1.0*rand()/RAND_MAX))))-1.0);
-        CurrentErrorMine = (CurrentErrorMine*320.0+1.0*(rndNbrProb))/321.0;
-        currentErrorBP = rndNbrProb;
-
-        generatedRandomVector.push_back(rndNbrProb);
-*/
-
 
         scene1->addPixmap(QPixmap::fromImage(*imageScaled));
         scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
