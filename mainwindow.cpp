@@ -83,7 +83,7 @@ void MainWindow::processNet(){
         //frequency = 4;
         float lastError = 0.0;
         vector<vector<vector<float>>> impulseResonses;
-        offset += 0.07;//1.0*rand()/RAND_MAX;
+        //offset += 0.07;//1.0*rand()/RAND_MAX;
 
         float squaredError = 0.0;
 
@@ -143,6 +143,8 @@ void MainWindow::processNet(){
                impulseResonses.push_back(thisLesson);
             }
 
+           Cluster0->learnEval((16.0*(pow(movingMeanErr/(numOutputs*numLessons*integrationSteps*2.0),0.5)-pow(sumErrorOver/(numOutputs*numLessons*integrationSteps*2.0),0.5))),(pow(sumErrorOver/(numOutputs*numLessons*integrationSteps*2.0),0.5)));
+
            if(train){
            for(int k = 0; k < (numLessons); k++){
                phase = 0.0;
@@ -182,32 +184,8 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //lastSquaredErr = sqaredErr;
-                           Cluster0->applyLearning(0.5,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
-
-
-                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
-
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,1.0,k);
+                           Cluster0->applyLearning(0.01,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
                        }
-
-/*
-                       float maxOut = 0.0;
-                       int maxIndex = 0;
-                       for(int i = 0; i < numOutputs; i++){
-                           if(out0[i+numInputs] > maxOut){
-                               maxIndex = i;
-                               maxOut = out0[i+numInputs];
-                           }
-                       }
-                       int swap = indexArray[k];
-                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
-                       indexArray[k] = maxIndex;
-*/
-                   //Cluster0->resetDeltaMatrix();
-
                 }
             }
 
@@ -250,31 +228,8 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //lastSquaredErr = sqaredErr;
-                           Cluster0->applyLearning(0.1,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
-
-
-                           //Cluster0->applyLearning(0.125,(1.0-pow(sqaredErr/(numOutputs),0.5)),k);
-
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,squaredError/(numOutputs*numOutputs),k);
-                           //Cluster0->propergate(inputV,emptyVO,(1.0-lastError));
-                           //Cluster0->applyLearning(0.1,1.0,k);
+                           Cluster0->applyLearning(0.01,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
                        }
-
-/*
-                       float maxOut = 0.0;
-                       int maxIndex = 0;
-                       for(int i = 0; i < numOutputs; i++){
-                           if(out0[i+numInputs] > maxOut){
-                               maxIndex = i;
-                               maxOut = out0[i+numInputs];
-                           }
-                       }
-                       int swap = indexArray[k];
-                       for(int i = 0; i < numOutputs; i++) if(indexArray[i] == maxIndex) indexArray[i] = swap;
-                       indexArray[k] = maxIndex;
-*/
-                   //Cluster0->resetDeltaMatrix();
 
                 }
             }
@@ -337,44 +292,6 @@ void MainWindow::processNet(){
         *imageRespScaled = (imageResp->scaled(pixSize2, Qt::KeepAspectRatio));
 
 
-        //image = new QImage(ClusterBP->getActivation().size()*2,ClusterBP->getActivation().size()*2,QImage::Format_RGB32);
-
-        /*
-        for(int x = 0; x < ClusterBP->getActivation().size()*2; x++){
-            for(int y = 0; y < ClusterBP->getActivation().size()*2; y++){
-                QColor col = QColor(128,128,128);
-
-                if(ClusterBP->getWeights()[y/2][x/2] > 0.0) col = QColor(255.0*1.0/(1.0+exp(-ClusterBP->getWeights()[y/2][x/2])),0,0);
-                if(ClusterBP->getWeights()[y/2][x/2] < 0.0) col = QColor(0,0,255.0*1.0/(1.0+exp(ClusterBP->getWeights()[y/2][x/2])));
-
-                image->setPixel(x,y,col.rgb());
-            }
-        }
-        */
-
-        //float movingMeanRandomnessFactor =
-/*
-        float unshapedMeanOver = 0.0;
-        //Vary size of random Vec on Precicion needed
-        for(int i = 0; i < generatedRandomVector.size(); i++) unshapedMeanOver += generatedRandomVector[i];
-        unshapedMeanOver /= generatedRandomVector.size();
-
-        float expShapedWheightedMeanOver = 0.0;
-
-        for(int i = 0; i < generatedRandomVector.size(); i++) expShapedWheightedMeanOver += generatedRandomVector[i]*exp(0.01*i);
-        expShapedWheightedMeanOver /= generatedRandomVector.size();
-
-        if(generatedRandomVector.size() > lengthOfRndVec) generatedRandomVector.erase(generatedRandomVector.begin());
-
-
-        float rndNbrProb = 10*(0.1+abs(expShapedWheightedMeanOver))*(2.0/(1.0+exp(-(-(1.0*rand()/RAND_MAX)+(1.0*rand()/RAND_MAX))))-1.0);
-        CurrentErrorMine = (CurrentErrorMine*320.0+1.0*(rndNbrProb))/321.0;
-        currentErrorBP = rndNbrProb;
-
-        generatedRandomVector.push_back(rndNbrProb);
-*/
-
-
         scene1->addPixmap(QPixmap::fromImage(*imageScaled));
         scene2->addPixmap(QPixmap::fromImage(*imageRespScaled));
 
@@ -384,7 +301,9 @@ void MainWindow::processNet(){
         }
 
         lastErrorMine = CurrentErrorMine;
-        CurrentErrorMine = sumErrorOver/numLessons;
+        CurrentErrorMine = sumErrorOver;
+
+        movingMeanErr = (movingMeanErr*16.0+sumErrorOver)/17.0;
 
         lastErrorBP = currentErrorBP;
         currentErrorBP = sumErrorOverBP;
@@ -394,7 +313,7 @@ void MainWindow::processNet(){
         coloredLine.setColor(col);
         ErrorView->addLine(iteration,0,iteration+1,0);
         ErrorView->addLine(iteration,-lastErrorBP*5,iteration+1,-currentErrorBP*5);
-        ErrorView->addLine(iteration,-lastErrorMine*4,iteration+1,-CurrentErrorMine*4,coloredLine);
+        ErrorView->addLine(iteration,-lastErrorMine*4/numLessons,iteration+1,-CurrentErrorMine*4/numLessons,coloredLine);
 
 
 
