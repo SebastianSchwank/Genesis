@@ -2,7 +2,7 @@
 
 
 #Bi-Neuronal Network
-- Native Self Supervised learning 
+- Native Self Supervised learning (similar to Reinforcement learning (model free/direct reinforcement learning)))
 - Error free, Derivative free learning
 - Neuron locale solution
 - The architecture is a multiple layered connected neural network with feedback connections
