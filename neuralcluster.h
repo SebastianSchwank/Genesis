@@ -32,7 +32,7 @@ public:
     void applyLearning(float learningRate, float globalRMSError, int type);
     void resetDeltaMatrix();
     void propergateEmpty(int steps);
-    void learnEval(float learningSignal,float learningRate);
+    void propergateImpulse(int steps, vector<float> input, vector<float> output);
 
     vector<float> getActivation();
 
