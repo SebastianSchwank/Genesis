@@ -305,14 +305,15 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             meanInputEnergy +=  (lastReal[j])*abs(weightsActive[i][j]);
         }
         //Do the correction on the weights accourding to the current activation on it
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
             if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-activationJ)*activationI*(balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
             if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(activationJ)*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (abs(activationJ-activationI)*(2.0*rand()/RAND_MAX-1.0)*0.001)*learningRate*learningRate*globalRMSError;
         }
-        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal+1.0*weightsActive[i][weightsActive.size()-1])/weightsActive.size()*learningRate;
+        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal+2.0*weightsActive[i][weightsActive.size()-1])/weightsActive.size()*learningRate;
     }
 
     float sumAbsWeights = 0.0;
