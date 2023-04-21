@@ -50,7 +50,7 @@ private:
     int integrationSteps = 7;
     float offset = 0.0;
 
-    int numLessons = 5;//sizeof (input)/sizeof (input[0]);
+    int numLessons = 3;//sizeof (input)/sizeof (input[0]);
     int iteration = 0;
     float currentErrorBP,CurrentErrorMine;
     float lastErrorBP,lastErrorMine;
@@ -59,9 +59,9 @@ private:
     vector<float> generatedRandomVector;
     int currentFrequency = 0;
     float phase = 0;
-    int numInputs = 48;//sizeof (input[0])/sizeof (input[0][0]);
-    int numOutputs = 5;//sizeof (output[0])/sizeof (output[0][0]);
-    int numHiddens = 32;
+    int numInputs = 24;//sizeof (input[0])/sizeof (input[0][0]);
+    int numOutputs = 3;//sizeof (output[0])/sizeof (output[0][0]);
+    int numHiddens = 24;
     int numAttentions = 0;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;

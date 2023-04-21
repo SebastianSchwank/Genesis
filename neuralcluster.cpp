@@ -291,50 +291,42 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         float meanInputSignal = 0.0;
         float balanceSignal = 0.0;
         float meanOutput = 0.0;
-        float meanInputInactive = 0.0;
+        float meanInputEnergy = 0.0;
 
         for(int j = 0; j < weightsActive.size()-1; j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            meanOutput += activationJ*(weightsActive[j][i]);
+            meanOutput += (activationJ)*(weightsActive[j][i]);
             balanceSignal += 2.0*(activationJ-0.5)*weightsActive[i][j];
             meanInputSignal +=  lastReal[j]*(weightsActive[i][j]);
 
             meanOutputInactive += (weightsActive[j][i]);
-            meanInputInactive +=  lastReal[j]*abs(weightsActive[i][j]);
+            meanInputEnergy +=  (lastReal[j])*abs(weightsActive[i][j]);
         }
         //Do the correction on the weights accourding to the current activation on it
-        float activationI = (EnergyFlowReal[i]);
         for(int j = 0; j < weightsActive.size()-1; j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            //Ausschlussverfahren (alles was nicht zur Aktivität beiträgt wird negativ Gewichtet)
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-activationJ)*activationI*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
-            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (activationJ)*(meanInputInactive/weightsActive.size())*learningRate*globalRMSError;
 
-            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (activationJ)*(1.0-activationI)*(balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
-            //Output Balance (Bestreben der Neuronen am Ausgang im Mittel der Gewichte keine "Aussage" zu treffen)
-            float otherInputRaw = 0.0;
-            for(int k = 0; k < weightsActive.size(); k++) otherInputRaw += weightsActive[j][i];
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(activationJ)*(meanOutputInactive)/weightsActive.size())*learningRate*globalRMSError;
-            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= ((1.0-activationI)*(activationJ)*(otherInputRaw)/weightsActive.size())*learningRate*globalRMSError;
-            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= ((2.0*rand()/RAND_MAX-1.0))*activationJ*(1.0-abs(activationI-activationJ))*learningRate*globalRMSError*learningRate;
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-lastReal[j])*activationI*(balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(lastReal[j])*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-activationI)*(abs(lastReal[j]-lastReal[i])*(2.0*rand()/RAND_MAX-1.0)*0.001)*learningRate*learningRate;
         }
-        weightsActive[i][weightsActive.size()-1] -= activationI*(meanInputSignal-1.0*weightsActive[i][weightsActive.size()-1])/weightsActive.size()*learningRate;
+        weightsActive[i][weightsActive.size()-1] -= (balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate;
     }
 
     float sumAbsWeights = 0.0;
     //Normalize the inputs and outputs of each neuron independently by random
     for(int i = 0; i < weightsActive.size(); i++)alreadyDone[i] = (false);
-    for(int m = 0; m < weightsActive.size(); m++){
+    for(int m = 0; m < weightsActive.size()-1; m++){
 
         //Select a random neuron which is not already corrected
         int i = -1;
         bool done = false;
         while(!done){
-                i = rand()%(weightsActive.size());
+                i = rand()%(weightsActive.size()-1);
                 if(alreadyDone[i] == false){
                     alreadyDone[i] = true;
                     done = true;
@@ -358,7 +350,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         //Calculate it's absolute weights at input and output
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
-        for(int j = 0; j < weightsActive.size(); j++){
+        for(int j = 0; j < weightsActive.size()-1; j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
             absWeightsOut += abs(weightsActive[j][i]);
@@ -369,7 +361,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
-        for(int j = 0; j < weightsActive.size(); j++){
+        for(int j = 0; j < weightsActive.size()-1; j++){
             weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*(weightsActive.size())*1.0;
             weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*(weightsActive.size())*1.0;
         }
@@ -550,13 +542,12 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             //EnergyFlowReal[i] =  (minMax(samplerRealInputSignal[i])*minMax(-gradient*8.0)+minMax(gradient*8.0)*EnergyFlowReal[i])/(minMax(-gradient*8.0)+minMax(gradient*8.0));
             if(energy > 0.0) EnergyFlowReal[i] =  (minMax(samplerRealInputSignal[i])*minMax(-gradient*5.0)*(energy)+minMax(gradient*5.0)*EnergyFlowReal[i]*(1.0-energy))/(minMax(-gradient*5.0)*(energy)+minMax(gradient*5.0)*(1.0-energy));
             else  EnergyFlowReal[i] =  (minMax(samplerRealInputSignal[i])*minMax(-gradient*5.0)+minMax(gradient*5.0)*EnergyFlowReal[i])/(minMax(-gradient*5.0)+minMax(gradient*5.0));
-            EnergyFlowReal[i] = EnergyFlowReal[i]+1.0*EnergyFlowReal[i]*(1.0-EnergyFlowReal[i])*((2.0*rand()/RAND_MAX)-1.0)*(energy);
+            EnergyFlowReal[i] = EnergyFlowReal[i]*(1.0-energy)+((1.0*rand()/RAND_MAX))*(energy);
 
             meanChanging[i] = (42.0*meanChanging[i]-(meanChanging[i]-EnergyFlowReal[i]))/(43.0);
 
-            EnergyFlowReal[i] *= 1.5-1.5*minMax(inPatternAnomaly);
-            EnergyFlowReal[i] *= 2.0/3.0;
-
+            EnergyFlowReal[i] *= 1.0-1.0*minMax(inPatternAnomaly);
+            //EnergyFlowReal[i] *= 2.0/3.0;
             //ActivityReal[i] = (fireReal[i]+samples*ActivityReal[i])/(samples+1.0);
             //EnergyFlowReal[i] = 0.5*(weightsActive.size())*samplerReal[i]/energyAbs;
 
