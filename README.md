@@ -17,7 +17,7 @@ Pro's:
 
 
  In short:
- One global calculated learning parameter supervises the whole network towards the given solution.
+ One global calculated learning parameter supervises the whole network towards the given solution by try (noise).
 
 
  In this demo the net learns to analyse the frequency for a given sine function (the count of the active neuron is the frequency).
