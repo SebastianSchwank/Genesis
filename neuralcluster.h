@@ -96,7 +96,6 @@ private:
 
     vector<float>         slope;
     vector<vector<float>> weightsActive;
-    vector<vector<float>> similarityBehavoir;
     vector<vector<float>> globMean;
     vector<vector<float>> globDistErr0;
     vector<vector<float>> globDistErr1;
