@@ -1,4 +1,5 @@
 #Bi-Neuronal Network
+- Global->Local reinforcement learning
 - Native Self Supervised learning 
 - Error free, Derivative free learning
 - Neuron locale solution
