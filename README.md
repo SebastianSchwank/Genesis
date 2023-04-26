@@ -15,6 +15,11 @@ Pro's:
 - Debug window for the activity of the neurons over all lessons included
 - Learning speed improvement VS. backpropagation in some cases
 
+
+ In short:
+ One global calculated learning parameter supervises the whole network towards the given solution.
+
+
  In this demo the net learns to analyse the frequency for a given sine function (the count of the active neuron is the frequency).
 
  This is my "n"-th implementation of the so called "CONDITIONAL NEURAL NETWORK"
