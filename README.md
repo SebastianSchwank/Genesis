@@ -1,5 +1,4 @@
 #Bi-Neuronal Network
-- Global->Local reinforcement learning
 - Native Self Supervised learning 
 - Error free, Derivative free learning
 - Neuron locale solution
@@ -14,11 +13,6 @@ Pro's:
 - Good paralellisation thanks to self error calculating neurons 
 - Debug window for the activity of the neurons over all lessons included
 - Learning speed improvement VS. backpropagation in some cases
-
-
- In short:
- One global calculated learning parameter supervises the whole network towards the given solution by try (noise).
-
 
  In this demo the net learns to analyse the frequency for a given sine function (the count of the active neuron is the frequency).
 
@@ -49,7 +43,7 @@ sebastian.schwank@googlemail.com
 
 License:
 
-The permission is given only for educational purposes.
+The permission is given only for ediucational.
 This software is written by Sebastian Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
 
 TODO:

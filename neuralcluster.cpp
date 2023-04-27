@@ -310,11 +310,11 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float activationJ = (EnergyFlowReal[j]);
 
 
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-lastReal[j])*activationI*(balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(lastReal[j])*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-lastReal[j])*activationI*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= ((1.0-activationI)*activationI*(lastReal[j])*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
             if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-activationI)*(abs(lastReal[j]-lastReal[i])*(2.0*rand()/RAND_MAX-1.0)*0.001)*learningRate*learningRate;
         }
-        weightsActive[i][weightsActive.size()-1] -= (balanceSignal/weightsActive.size()*meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate;
+        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate;
     }
 
     float sumAbsWeights = 0.0;
