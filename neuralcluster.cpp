@@ -302,7 +302,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             meanInputSignal +=  lastReal[j]*(weightsActive[i][j]);
 
             meanOutputInactive += (weightsActive[j][i]);
-            meanInputEnergy +=  (weightsActive[i][j]);
+            meanInputEnergy +=  lastReal[j]*abs(weightsActive[j][i]);
         }
         float activationI = (EnergyFlowReal[i]);
         //Do the correction on the weights accourding to the current activation on it
@@ -310,11 +310,20 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (1.0-lastReal[j])*activationI*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(lastReal[j])*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
-            if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*(1.0-activationI)*((abs(activationI-lastReal[i]))*(2.0*rand()/RAND_MAX-1.0))*learningRate*globalRMSError;
+            float meanOutputConter = 0.0;
+            for(int k = 0; k < weightsActive.size()-1; k++) meanOutputConter += weightsActive[k][j];
+            weightsActive[i][j] -= (1.0-activationJ)*lastReal[i]*((meanInputSignal+(lastReal[j])*meanOutputConter)/weightsActive.size())*learningRate*globalRMSError;
+            //weightsActive[i][j] -= (1.0-activationJ)*(1.0-lastReal[i])*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (activationJ)*(1.0-lastReal[i])*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (1.0-activationJ)*lastReal[i]*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (1.0-activationJ)*lastReal[i]*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
+
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (activationI*(lastReal[j])*meanOutputInactive/weightsActive.size())*learningRate*globalRMSError;
+            //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*(1.0-activationI)*((abs(activationI-lastReal[i]))*(2.0*rand()/RAND_MAX-1.0))*learningRate*globalRMSError;
         }
-        weightsActive[i][weightsActive.size()-1] -= activationI*(1.0-activationI)*(meanInputSignal/weightsActive.size()+1.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
+        //TODO: Think about the bias !
+        weightsActive[i][weightsActive.size()-1] -= activationI*(1.0-activationI)*(meanInputSignal/meanInputEnergy+2.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
     }
 
     float sumAbsWeights = 0.0;
@@ -334,7 +343,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
-        for(int j = 0; j < weightsActive.size(); j++){
+        for(int j = 0; j < weightsActive.size()-1; j++){
             //weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*(weightsActive.size())*1.0;
 
             //Switch of some weights which are not nescessary

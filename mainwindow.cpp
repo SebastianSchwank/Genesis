@@ -67,7 +67,7 @@ void MainWindow::processNet(){
         //frequency = 4;
         float lastError = 0.0;
         vector<vector<vector<float>>> impulseResonses;
-        offset += 0.07;//1.0*rand()/RAND_MAX;
+        //offset += 0.07;//1.0*rand()/RAND_MAX;
 
         float squaredError = 0.0;
 
@@ -166,7 +166,7 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //Direct Reinforcment learning
-                           Cluster0->applyLearning(0.5,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
+                           Cluster0->applyLearning(0.1,(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5))*(1.0-pow(lastSquaredErr/(numOutputs),0.5))*exp((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
 
                        }
                 }
@@ -210,7 +210,7 @@ void MainWindow::processNet(){
 
                            lastSquaredErr = sqaredErr;
                            //Direct Reinforcement learning
-                           Cluster0->applyLearning(0.5,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
+                           Cluster0->applyLearning(0.1,((pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)))*(pow(lastSquaredErr/(numOutputs),0.5))*exp(-(pow(squaredError/(numOutputs*numOutputs*integrationSteps*2.0),0.5)-pow(lastSquaredErr/(numOutputs),0.5))),k);
                        }
 
                 }
