@@ -323,7 +323,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*(1.0-activationI)*((abs(activationI-lastReal[i]))*(2.0*rand()/RAND_MAX-1.0))*learningRate*globalRMSError;
         }
         //TODO: Think about the bias !
-        weightsActive[i][weightsActive.size()-1] -= activationI*(1.0-activationI)*(meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
+        weightsActive[i][weightsActive.size()-1] -= (meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
     }
 
     float sumAbsWeights = 0.0;
