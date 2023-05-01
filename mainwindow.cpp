@@ -67,7 +67,7 @@ void MainWindow::processNet(){
         //frequency = 4;
         float lastError = 0.0;
         vector<vector<vector<float>>> impulseResonses;
-        //offset += 0.07;//1.0*rand()/RAND_MAX;
+        offset += 0.07;//1.0*rand()/RAND_MAX;
 
         float squaredError = 0.0;
 
