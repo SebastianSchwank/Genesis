@@ -312,7 +312,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
             float meanOutputConter = 0.0;
             for(int k = 0; k < weightsActive.size()-1; k++) meanOutputConter += weightsActive[k][j];
-            weightsActive[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            weightsActive[i][j] -= lastReal[i]*(balanceSignal/weightsActive.size())*(((1.0-activationJ)*meanInputSignal+activationJ*meanOutputConter)/(2.0*meanInputEnergy))*learningRate*globalRMSError;
             //weightsActive[i][j] -= (1.0-activationJ)*(1.0-lastReal[i])*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= (activationJ)*(1.0-lastReal[i])*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[j][i] -= (1.0-activationJ)*lastReal[i]*(meanInputSignal/weightsActive.size())*learningRate*globalRMSError;
@@ -323,7 +323,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //if(type == synapseType[j][i]||type == synapseType[i][j] || synapseType[i][j] == -1 || synapseType[j][i] == -1) weightsActive[i][j] -= activationI*(1.0-activationI)*((abs(activationI-lastReal[i]))*(2.0*rand()/RAND_MAX-1.0))*learningRate*globalRMSError;
         }
         //TODO: Think about the bias !
-        weightsActive[i][weightsActive.size()-1] -= activationI*(1.0-activationI)*(meanInputSignal/weightsActive.size()+2.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
+        weightsActive[i][weightsActive.size()-1] -= ((balanceSignal*meanInputSignal)/(weightsActive.size()*weightsActive.size())+2.0*weightsActive[i][weightsActive.size()-1])*learningRate*globalRMSError;
     }
 
     float sumAbsWeights = 0.0;
