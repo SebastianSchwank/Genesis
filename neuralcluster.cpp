@@ -321,10 +321,10 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float meanFreedEnergy = 0.0;
             for(int k = 0; k < weightsActive.size()-1; k++){
 
-                meanOutputConter += lastReal[k]*weightsActive[k][j];
+                meanOutputConter += weightsActive[k][j];
                 meanFreedEnergy += lastReal[k]*abs(weightsActive[k][j]);
             }
-            weightsActive[i][j] -= (activationI)*(((1.0-activationJ)*(meanInputSignal)+1.0*(meanFreedEnergy/weightsActive.size())*(1.0-activationI)*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            weightsActive[i][j] -= (activationI)*(((1.0-activationJ)*(meanInputSignal)+(meanFreedEnergy/weightsActive.size())*(1.0-activationI)*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
             //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
