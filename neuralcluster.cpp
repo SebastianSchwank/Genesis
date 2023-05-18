@@ -312,6 +312,8 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
         float activationI = (EnergyFlowReal[i]);
 
+        //Entropie,Energy,Fitting
+
         //Do the correction on the weights accourding to the current activation on it
         for(int j = 0; j < weightsActive.size()-1; j++){
             float activationI = (EnergyFlowReal[i]);
@@ -321,10 +323,10 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float meanFreedEnergy = 0.0;
             for(int k = 0; k < weightsActive.size()-1; k++){
 
-                meanOutputConter += weightsActive[k][j];
+                meanOutputConter += 4.0*(1.0-lastReal[k])*(lastReal[k])*weightsActive[k][j];
                 meanFreedEnergy += lastReal[k]*abs(weightsActive[k][j]);
             }
-            weightsActive[i][j] -= (activationI)*(((1.0-activationJ)*(meanInputSignal)+(meanFreedEnergy/weightsActive.size())*(1.0-activationI)*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            weightsActive[i][j] -= (activationI)*(((1.0-activationJ)*(meanInputSignal)+(1.0-activationI)*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
             //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
@@ -341,7 +343,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
         //TODO: Think about the bias !
         // ---> cluster splitting via bias->offset
-        weightsActive[i][weightsActive.size()-1] -= ((activationI*(1.0-activationI)))*((maxActiv+minActiv)/weightsActive.size())*learningRate*globalRMSError;
+        weightsActive[i][weightsActive.size()-1] -= ((meanInputSignal)/weightsActive.size())*(activationI*(1.0-activationI))*((maxActiv+minActiv)/weightsActive.size())*learningRate*globalRMSError;
     }
 
     float sumAbsWeights = 0.0;
