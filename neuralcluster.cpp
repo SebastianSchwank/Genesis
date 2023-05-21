@@ -296,7 +296,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         float maxActiv = -INFINITY;
         float minActiv = INFINITY;
 
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
@@ -315,18 +315,18 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         //Entropie,Energy,Fitting
 
         //Do the correction on the weights accourding to the current activation on it
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
             float meanOutputConter = 0.0;
             float meanFreedEnergy = 0.0;
-            for(int k = 0; k < weightsActive.size()-1; k++){
 
-                meanOutputConter += 4.0*(1.0-lastReal[k])*(lastReal[k])*weightsActive[k][j];
-                meanFreedEnergy += lastReal[k]*abs(weightsActive[k][j]);
+            for(int k = 0; k < weightsActive.size(); k++){
+                meanOutputConter += weightsActive[k][j];
+                meanFreedEnergy += lastReal[k]*abs(weightsActive[k][i]);
             }
-            weightsActive[i][j] -= (activationI)*(((1.0-activationJ)*(meanInputSignal)+(1.0-activationI)*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            weightsActive[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(1.0-activationI)*activationJ*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
             //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
@@ -343,7 +343,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
         //TODO: Think about the bias !
         // ---> cluster splitting via bias->offset
-        weightsActive[i][weightsActive.size()-1] -= ((meanInputSignal)/weightsActive.size())*(activationI*(1.0-activationI))*((maxActiv+minActiv)/weightsActive.size())*learningRate*globalRMSError;
+        //weightsActive[i][weightsActive.size()-1] -= (activationI*(1.0-activationI))*((maxActiv+minActiv)/weightsActive.size())*learningRate*globalRMSError;
     }
 
     float sumAbsWeights = 0.0;
@@ -368,9 +368,14 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
 
             //Switch of some weights which are not nescessary
             //if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
+
+
             if((i >= numInputs)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
+
+
             //if(i != j && (i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (i < weightsActive.size())&& (j < weightsActive.size()-1)){ weightsActive[i][j] = 0.0; }
             //if((i >= (weightsActive.size()-1))&& (j >= 0) && (i <= weightsActive.size())){ weightsActive[i][j] = 0.0; }
+
             //if(mask[i][j]){ weightsActive[i][j] = 0.0; }
 
             if(i == j){ weightsActive[i][j] = 0.0; }
@@ -519,11 +524,11 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
                 float activationI = fireReal[i];
                 float activationJ = (fireReal[j]);
 /*
-                if(weightsActive[i][j] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[i][j])*activationI;
-                else inPatternAnomaly += (1.0-activationJ)*abs(weightsActive[i][j])*activationI;
+                if(weightsActive[i][j] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[i][j])*(activationI);
+                else inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[i][j])*(activationI);
 
                 if(weightsActive[i][j] < 0.0) inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[i][j])*activationI;
-                else inPatternAnomaly -= (activationJ)*abs(weightsActive[i][j])*activationI;
+                else inPatternAnomaly += (activationJ)*abs(weightsActive[i][j])*activationI;
 */
                 if(weightsActive[j][i] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[j][i])*activationI;
                 else inPatternAnomaly += (1.0-activationJ)*abs(weightsActive[j][i])*activationI;
@@ -534,7 +539,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
 
 
                     InputSignalCounter +=  fireCounter[j]*(weightsActive[i][j]+deltaMatrix[i][j]);//*(1.0/absEnergyCounter)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireCounter[j]-fireCounter[i]));
-                    InputSignalReal += fireReal[j]*(1.0-0.0*fireReal[i]*(weightsActive[i][j]+deltaMatrix[i][j]))*(weightsActive[i][j]+deltaMatrix[i][j]);//*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size()*energy;//*(1.0-abs(fireReal[j]-fireReal[i]));
+                    InputSignalReal += fireReal[j]*(1.0-0.0*fireReal[i]*(weightsActive[i][j]+deltaMatrix[i][j]))*(weightsActive[i][j]+deltaMatrix[i][j]);//*(1.0/absEnergyReal)*weightsActive.size()*weightsActive.size();//*(1.0-abs(fireReal[j]-fireReal[i]));
                     selfSignal += fireReal[j]*minMax(-16.0*lastReal[i]*(weightsActive[j][i]))*(weightsActive[i][j]);
 
                     relativeBehaviour[i][j] = (123.0*relativeBehaviour[i][j]+(((EnergyFlowReal[i]-0.5)*(EnergyFlowReal[j]-0.5))))/124.0;
@@ -575,8 +580,8 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
 
             meanChanging[i] = (42.0*meanChanging[i]-(meanChanging[i]-EnergyFlowReal[i]))/(43.0);
 
-            //EnergyFlowReal[i] *= 1.5-1.5*minMax(inPatternAnomaly);
-            //EnergyFlowReal[i] *= 2.0/3.0;
+            EnergyFlowReal[i] *= 1.5-1.5*minMax(inPatternAnomaly);
+            EnergyFlowReal[i] *= 2.0/3.0;
 
             //ActivityReal[i] = (fireReal[i]+samples*ActivityReal[i])/(samples+1.0);
             //EnergyFlowReal[i] = 0.5*(weightsActive.size())*samplerReal[i]/energyAbs;
