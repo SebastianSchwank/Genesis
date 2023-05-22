@@ -43,7 +43,7 @@ sebastian.schwank@googlemail.com
 
 License:
 
-The permission is given only for ediucational.
+The permission is given only for educational purposes.
 This software is written by Sebastian Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
 
 TODO:
