@@ -49,6 +49,7 @@ This software is written by Sebastian Benedigt Josua Schwank. These three senten
 For commercial usage and developement please contact me via Facebook:
 
 www.facebook.com/sebastian.schwank
+(Feel free to discuss my ideas with me :o)
 
 TODO:
 
