@@ -43,8 +43,12 @@ sebastian.schwank@googlemail.com
 
 License:
 
-The permission is given only for ediucational.
-This software is written by Sebastian Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
+The permission is given only for ediucational usage.
+This software is written by Sebastian Benedigt Josua Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
+
+For commercial usage and developement please contact me via Facebook:
+
+www.facebook.com/sebastian.schwank
 
 TODO:
 
