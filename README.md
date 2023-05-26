@@ -1,3 +1,6 @@
+![Screenshot](https://raw.githubusercontent.com/SebastianSchwank/Genesis/main/20230526_171024.jpg)
+AGI-Core
+
 #Energy<->Entropie<->Fitting
 - Native Self Supervised learning 
 - Error free, Derivative free learning
