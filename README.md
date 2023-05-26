@@ -1,5 +1,5 @@
 ![Screenshot](https://raw.githubusercontent.com/SebastianSchwank/Genesis/main/20230526_171024.jpg)
-AGI-Core
+AGI-Core[W.I.P.]
 
 #Energy<->Entropie<->Fitting
 - Native Self Supervised learning 
