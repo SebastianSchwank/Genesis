@@ -46,6 +46,9 @@ sebastian.schwank@googlemail.com
 
 License:
 
+Usage and developement on your own risk.
+No warrenty!
+
 The permission is given only for ediucational usage.
 This software is written by Sebastian Benedigt Josua Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
 
