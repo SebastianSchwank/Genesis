@@ -45,17 +45,17 @@ sebastian.schwank@googlemail.com
 \sum \limits_{n=0}^{\infty}
 
 License:
-
 Usage and developement on your own risk.
 No warrenty!
-
 The permission is given only for ediucational usage.
-This software is written by Sebastian Benedigt Josua Schwank. These three sentences have to be included in the Software License and it's permitted to remove them.
+This software is written by Sebastian Benedigt Josua Schwank. 
 
 For commercial usage and developement please contact me via Facebook:
 
 www.facebook.com/sebastian.schwank
 (Feel free to discuss my ideas with me :o)
+
+These sentences have to be included in the Software License and it's permitted to remove them.
 
 TODO:
 
