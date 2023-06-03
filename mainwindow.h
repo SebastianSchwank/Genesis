@@ -59,9 +59,9 @@ private:
     vector<float> generatedRandomVector;
     int currentFrequency = 0;
     float phase = 0;
-    int numInputs = 32;//sizeof (input[0])/sizeof(input[0][0]);
+    int numInputs = 27;//sizeof (input[0])/sizeof(input[0][0]);
     int numOutputs = 4;//sizeof (output[0])/sizeof(output[0][0]);
-    int numHiddens = 24;
+    int numHiddens = 27;
     int numAttentions = 0;
     NeuralCluster* Cluster0;
     NeuralCluster* Cluster1;

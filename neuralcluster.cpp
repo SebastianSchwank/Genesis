@@ -296,7 +296,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         float maxActiv = -INFINITY;
         float minActiv = INFINITY;
 
-        for(int j = 0; j < weightsActive.size(); j++){
+        for(int j = 0; j < weightsActive.size()-1; j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
@@ -312,6 +312,9 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         }
         float activationI = (EnergyFlowReal[i]);
 
+
+        //Try clever sampling !! (FW-Pass/BW-Pass)
+
         //Entropie,Energy,Fitting
 
         //Do the correction on the weights accourding to the current activation on it
@@ -323,10 +326,10 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float meanFreedEnergy = 0.0;
 
             for(int k = 0; k < weightsActive.size(); k++){
-                meanOutputConter += weightsActive[k][j];
+                meanOutputConter += lastReal[k]*weightsActive[k][j];
                 meanFreedEnergy += lastReal[k]*abs(weightsActive[k][i]);
             }
-            weightsActive[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(1.0-activationI)*activationJ*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            deltaMatrix[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(1.0-activationI)*activationJ*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
             //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
@@ -370,7 +373,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             //if((i >= 0)&& (j >= 0) && (i < numInputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
 
 
-            if((i >= numInputs)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
+            //if((i >= numInputs)&& (j >= 0) && (i < numInputs+numOutputs)&& (j < numInputs)){ weightsActive[i][j] = 0.0; }
 
 
             //if(i != j && (i >= numInputs+numOutputs)&& (j >= numInputs+numOutputs) && (i < weightsActive.size())&& (j < weightsActive.size()-1)){ weightsActive[i][j] = 0.0; }
@@ -384,22 +387,48 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
         //Calculate it's absolute weights at input and output
         float absWeightsOut = 0.0;
         float absWeightsIn = 0.0;
-        for(int j = 0; j < weightsActive.size()-1; j++){
+        float maxOut = -INFINITY;
+        float maxIn = -INFINITY;
+        for(int j = 0; j < weightsActive.size(); j++){
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
             absWeightsOut += abs(weightsActive[j][i]);
             absWeightsIn += abs(weightsActive[i][j]);
+
+            if(maxIn < abs(deltaMatrix[i][j])) maxIn = abs(deltaMatrix[i][j]);
+            if(maxOut < abs(deltaMatrix[j][i])) maxOut = abs(deltaMatrix[j][i]);
+
         }
 
         sumAbsWeights += absWeightsIn;
 
 
         //Normalize the inputs and outputs of each neuron so their absoulte sum is one
-        for(int j = 0; j < weightsActive.size()-1; j++){
-            weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*(weightsActive.size())*1.0;
-            weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*(weightsActive.size())*1.0;
+        for(int j = 0; j < weightsActive.size(); j++){
+
+            float activationI = (1.0-EnergyFlowReal[i]);
+            float activationJ = (1.0-EnergyFlowReal[j]);
+
+            weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*weightsActive.size();
+            weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*weightsActive.size();
         }
     }
+
+    for(int i = 0; i < weightsActive.size(); i++){
+    //Normalize the inputs and outputs of each neuron so their absoulte sum is one
+    for(int j = 0; j < weightsActive.size()-1; j++){
+
+        float activationI = (EnergyFlowReal[i]);
+        float activationJ = (1.0-EnergyFlowReal[j]);
+
+        deltaMatrix[i][j] += activationJ*activationI*((deltaMatrix[i][j])/(sumAbsWeights))*learningRate*learningRate;
+
+        //weightsActive[i][j] = deltaMatrix[i][j];
+        weightsActive[i][j] += deltaMatrix[i][j]*learningRate*learningRate;
+    }
+    }
+
+
     lastGlobErr = globalRMSError;
 }
 
