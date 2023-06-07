@@ -326,7 +326,7 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
                 meanOutputConter += weightsActive[k][j];
                 meanFreedEnergy += lastReal[k]*abs(weightsActive[k][i]);
             }
-            deltaMatrix[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+activationJ*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            deltaMatrix[i][j] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(1.0-activationI)*activationJ*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
             //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
@@ -529,13 +529,13 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             for(int j = 0; j < weightsActive[i].size(); j++){
                 float activationI = fireReal[i];
                 float activationJ = (fireReal[j]);
-/*
+
                 if(weightsActive[i][j] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[i][j])*(activationI);
                 else inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[i][j])*(activationI);
 
                 if(weightsActive[i][j] < 0.0) inPatternAnomaly -= (1.0-activationJ)*abs(weightsActive[i][j])*activationI;
                 else inPatternAnomaly += (activationJ)*abs(weightsActive[i][j])*activationI;
-*/
+
                 if(weightsActive[j][i] < 0.0) inPatternAnomaly += (activationJ)*abs(weightsActive[j][i])*activationI;
                 else inPatternAnomaly += (1.0-activationJ)*abs(weightsActive[j][i])*activationI;
 
