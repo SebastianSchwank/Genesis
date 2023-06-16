@@ -578,6 +578,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             samplerRealInputSignal[i] = 24.0*(InputSignalReal/EnergyInputReal-1.0*beforelastReal[i]*(impulseResponse[i])/weightsActive.size())*(1.0-energy);
 
             samplerRealEnergyBillance[i] = samplerRealInput[i]-samplerRealOutput[i];
+            //Add self rekurrence weight for more dynamic behavior (Magnetic VS. Bouncy)
             float gradient = 1.0*(4.0*minMax(samplerRealInputSignal[i])*minMax(-samplerRealInputSignal[i])-4.0*EnergyFlowReal[i]*(1.0-EnergyFlowReal[i]));
             //EnergyFlowReal[i] =  (minMax(samplerRealInputSignal[i])*minMax(-gradient*8.0)+minMax(gradient*8.0)*EnergyFlowReal[i])/(minMax(-gradient*8.0)+minMax(gradient*8.0));
             if(energy > 0.0) EnergyFlowReal[i] =  (minMax(samplerRealInputSignal[i])*minMax(-gradient*5.0)*(energy)+minMax(gradient*5.0)*EnergyFlowReal[i]*(1.0-energy))/(minMax(-gradient*5.0)*(energy)+minMax(gradient*5.0)*(1.0-energy));
