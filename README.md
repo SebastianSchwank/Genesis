@@ -50,8 +50,6 @@ No warrenty!
 For the future of humanity!
 This software is written by Sebastian Benedigt Josua Schwank. 
 
-For commercial usage and developement please contact me via Facebook:
-
 www.facebook.com/sebastian.schwank
 (Feel free to discuss my ideas with me :o)
 
