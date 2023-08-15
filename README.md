@@ -47,7 +47,7 @@ sebastian.schwank@googlemail.com
 License:
 Usage and developement on your own risk.
 No warrenty!
-The permission is given only for ediucational usage.
+For the future of humanity!
 This software is written by Sebastian Benedigt Josua Schwank. 
 
 For commercial usage and developement please contact me via Facebook:
