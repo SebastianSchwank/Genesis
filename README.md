@@ -53,9 +53,9 @@ This software is written by Sebastian Benedigt Josua Schwank.
 www.facebook.com/sebastian.schwank
 (Feel free to discuss my ideas with me :o)
 
-These sentences have to be included in the Software License and it's permitted to remove them.
-
 The permission is only given for educational purposes also retroactive.
+
+All these sentences have to be included in the Software License and it's permitted to remove them.
 
 TODO:
 
