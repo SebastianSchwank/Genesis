@@ -55,6 +55,8 @@ www.facebook.com/sebastian.schwank
 
 These sentences have to be included in the Software License and it's permitted to remove them.
 
+The permission is only given for educational purposes also retroactive.
+
 TODO:
 
 Cuda Implementation
