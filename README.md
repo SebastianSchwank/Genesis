@@ -3,7 +3,7 @@ AGI-Core-Clustersegment[W.I.P.]
 
 #Energy<->Entropie<->Fitting
 - Native Self Supervised learning 
-- Error free, Backpropagation free learning
+- Error free, Derivative free learning
 - Neuron locale solution
 - The architecture is a multiple layered connected neural network with feedback connections
 - It works without backpropagation
