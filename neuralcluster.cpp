@@ -323,11 +323,11 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float meanFreedEnergy = 0.0;
 
             for(int k = 0; k < weightsActive.size()-1; k++){
-                meanOutputConter += weightsActive[k][j]*abs(0.5-EnergyFlowReal[k]);
+                meanOutputConter += weightsActive[k][j];
                 meanFreedEnergy += abs(weightsActive[k][i]);
-            }
-            deltaMatrix[i][j] -= (lastReal[i])*(((1.0-activationJ)*meanInputSignal+abs(activationJ-lastReal[j])*(0.0*meanOutputConter+1.0*meanInputBallance))/(weightsActive.size()))*learningRate*(globalRMSError)*1.0;
-            //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+            }//Differenzenquotionten
+                        deltaMatrix[i][j] -= ((abs(1.0-activationJ)*(lastReal[i])*(meanInputSignal/weightsActive.size())+(abs(activationJ-lastReal[j])*abs(lastReal[i]-activationI)*(meanInputBallance+meanOutputConter))/(weightsActive.size())))*learningRate*(globalRMSError)*1.0; //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
+                        //if(i == weightsActive.size()-1) weightsActive[i][j] = weightsActive[j][i] -= lastReal[i]*(((1.0-activationJ)*meanInputSignal+(lastReal[j])*meanOutputConter)/(weightsActive.size()))*learningRate*globalRMSError;
 
             //weightsActive[i][j] -=  activationI*activationJ*(impulseResponse[i]+impulseResponse[j])/(weightsActive.size())*learningRate*globalRMSError;
 
@@ -399,8 +399,8 @@ void NeuralCluster::applyLearning(float learningRate,float globalRMSError, int t
             float activationI = (EnergyFlowReal[i]);
             float activationJ = (EnergyFlowReal[j]);
 
-            weightsActive[i][j] += activationJ*deltaMatrix[i][j]*learningRate*(1.0-globalRMSError);
-            deltaMatrix[i][j] -= (1.0-activationJ)*4.0*(1.0-activationI)*(activationI)*deltaMatrix[i][j]*learningRate*(globalRMSError);
+            weightsActive[i][j] += abs(activationJ-lastReal[j])*deltaMatrix[i][j]*learningRate*(1.0-globalRMSError);
+            deltaMatrix[j][i] -= abs(lastReal[j]-activationJ)*4.0*(1.0-activationI)*(activationI)*deltaMatrix[j][i]*learningRate*(globalRMSError);
 
             weightsActive[i][j] = ((weightsActive[i][j])/(absWeightsIn))*(weightsActive.size())*1.0;
             weightsActive[j][i] = ((weightsActive[j][i])/(absWeightsOut))*(weightsActive.size())*1.0;
