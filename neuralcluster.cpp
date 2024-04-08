@@ -482,8 +482,8 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
 
 
     for(int i = 0; i < numInputs+numOutputs+numHiddens+numRekurrent; i++){
-
-        fireReal[i] = EnergyFlowReal[i];
+        fireReal[i] = 0.0;
+        if(EnergyFlowReal[i] > 1.0*(rand()/RAND_MAX)) fireReal[i] = EnergyFlowReal[i];
     }
 
 
@@ -585,7 +585,7 @@ void NeuralCluster::propergate(vector<float> input,vector<float> output, float e
             samplerRealOutputSignal[i] = OutputSignalReal/(0.0001+EnergyOutputReal);
 
             samplerCounterInputSignal[i] = InputSignalCounter;
-            samplerRealInputSignal[i] = 24.0*(InputSignalReal/EnergyInputReal-1.0*beforelastReal[i]*(impulseResponse[i])/weightsActive.size())*(1.0-energy);
+            samplerRealInputSignal[i] = 24.0*(InputSignalReal/EnergyInputReal-0.0*beforelastReal[i]*(impulseResponse[i])/weightsActive.size())*(1.0-energy);
 
             samplerRealEnergyBillance[i] = samplerRealInput[i]-samplerRealOutput[i];
             //Add self rekurrence weight for more dynamic behavior (Magnetic VS. Bouncy)
