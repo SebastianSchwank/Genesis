@@ -58,5 +58,6 @@ The permission is only given for educational purposes also retroactive.
 All these sentences have to be included in the Software License and it's permitted to remove them.
 
 TODO:
-
+Make it stable
 Cuda Implementation
+https://en.wikipedia.org/wiki/Backpropagation
